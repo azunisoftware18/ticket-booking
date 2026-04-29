@@ -3,9 +3,11 @@
 import React, { useState } from 'react';
 import { Menu, X, MapPin, Search, Globe } from 'lucide-react';
 import Button from './ui/Button';
+import { useRouter } from 'next/navigation';
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
 
   // const navLinks = [
   //   { name: 'Destinations', href: '#' },
@@ -53,7 +55,7 @@ export default function Header() {
 
             {/* Book Now Button (Ab ye end mein hai) */}
             <div className="hidden lg:block">
-              <Button text="Book Now" />
+              <Button text="Book Now" onClick={() => router.push('/book-tickets')}/>
             </div>
 
             {/* Mobile Menu Button */}
@@ -72,7 +74,7 @@ export default function Header() {
         <div className="absolute inset-x-0 top-20 bg-white p-6 shadow-2xl md:hidden border-t border-gray-50">
           <div className="flex flex-col gap-5">
             {/* Mobile mein button top par rakha hai for quick action */}
-            <Button text="Book Now" className="w-full" />
+            <Button text="Book Now" className="w-full" onClick={() => router.push('/book-tickets')} />
             
             <div className="flex flex-col gap-4 mt-2">
               {navLinks.map((link) => (
