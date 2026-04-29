@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// USER
+model User {
+  id        String   @id @default(uuid())
+  fullName  String   @map("full_name")
+  role      String   @default("USER")
+  email     String   @unique
+  phone     String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  tickets Ticket[]
+
+  @@map("users")
+}
+
+// EVENT / ROUTE
+model Event {
+  id        String    @id @default(uuid())
+  title     String
+  location  String?
+  price     Float
+  startTime DateTime  @map("start_time")
+  endTime   DateTime? @map("end_time")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  tickets Ticket[]
+
+  @@map("events")
+}
+
+// GATE (ENTRY / EXIT)
+model Gate {
+  id        String   @id @default(uuid())
+  name      String
+  type      GateType
+  location  String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("gates")
+}
+
+// TICKET
+model Ticket {
+  id      String @id @default(uuid())
+  userId  String
+  eventId String
+
+  qrCode String @unique
+
+  status TicketFlowStatus @default(PENDING)
+
+  entryGateId String? @map("entry_gatev_id")
+  exitGateId  String? @map("exit_gate_id")
+
+  entryAt DateTime? @map("entry_at")
+  exitAt  DateTime? @map("exit_at")
+
+  expiresAt DateTime @map("expires_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user     User      @relation(fields: [userId], references: [id])
+  event    Event     @relation(fields: [eventId], references: [id])
+  scanLogs ScanLog[]
+
+  @@index([qrCode])
+  @@index([userId])
+  @@index([eventId])
+  @@map("tickets")
+}
+
+// SCAN LOG (VERY IMPORTANT)
+model ScanLog {
+  id       String   @id @default(uuid())
+  ticketId String   @map("ticket_id")
+  gateId   String   @map("gate_id")
+  type     GateType
+
+  scannedAt DateTime @default(now()) @map("scanned_at")
+
+  ticket Ticket @relation(fields: [ticketId], references: [id])
+
+  @@index([ticketId])
+  @@map("scan_logs")
+}
+
+// ENUMS
+enum TicketFlowStatus {
+  PENDING // booked but not used
+  IN_PROGRESS // entry done
+  COMPLETED // exit done
+  EXPIRED // expired
+  CANCELLED
+}
+
+enum GateType {
+  ENTRY
+  EXIT
+}
