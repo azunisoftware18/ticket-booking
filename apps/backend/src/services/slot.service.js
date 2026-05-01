@@ -5,6 +5,13 @@ class SlotService {
   static async createSlot(payload) {
     const { placeId, startTime, endTime, capacity } = payload;
 
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+
+    if (start >= end) {
+      throw ApiError.badRequest("Start time must be before end time");
+    }
+
     const place = await prisma.place.findUnique({
       where: { id: placeId },
     });
@@ -16,33 +23,27 @@ class SlotService {
     const overlapping = await prisma.slot.findFirst({
       where: {
         placeId,
-        OR: [
-          {
-            startTime: { lte: new Date(endTime) },
-            endTime: { gte: new Date(startTime) },
-          },
-        ],
+        startTime: { lt: end },
+        endTime: { gt: start },
       },
     });
 
     if (overlapping) {
-      throw ApiError.conflict("Slot time overlaps with existing slot");
+      throw ApiError.conflict("Slot overlaps with existing slot");
     }
 
-    const slot = await prisma.slot.create({
+    return await prisma.slot.create({
       data: {
         placeId,
-        startTime: new Date(startTime),
-        endTime: new Date(endTime),
+        startTime: start,
+        endTime: end,
         capacity,
       },
     });
-
-    return slot;
   }
 
   static async getSlots(placeId) {
-    return await prisma.slot.findMany({
+    return prisma.slot.findMany({
       where: { placeId },
       orderBy: { startTime: "asc" },
     });

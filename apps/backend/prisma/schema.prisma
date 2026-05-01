@@ -33,12 +33,17 @@ model Place {
   latitude  Float?
   longitude Float?
 
+  shortDescription String?
+  description      String? @db.LongText
+
   createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   slots       Slot[]
   ticketTypes TicketType[]
   tickets     Ticket[]
 
+  @@unique([name, location])
   @@map("places")
 }
 
