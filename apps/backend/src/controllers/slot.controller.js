@@ -1,25 +1,46 @@
-import asyncHandler from "../utils/AsyncHandler.js";
-import SlotService from "../services/slot.service.js";
-import { ApiResponse } from "../utils/ApiResponse.js";
+import {
+  SlotTemplateService,
+  SlotOverrideService,
+  SlotService,
+} from "../services/slot.service.js";
 
-class SlotController {
-  static create = asyncHandler(async (req, res) => {
-    const data = await SlotService.createSlot(req.body);
+class SlotTemplateController {
+  static create = async (req, res) => {
+    const data = await SlotTemplateService.create(req.body);
+    res.success(data, "Template created");
+  };
 
-    return res
-      .status(201)
-      .json(ApiResponse.success(data, "Slot created successfully", 201));
-  });
+  static list = async (req, res) => {
+    const data = await SlotTemplateService.getAll(req.params.placeId);
+    res.success(data);
+  };
 
-  static list = asyncHandler(async (req, res) => {
-    const { placeId } = req.params;
+  static update = async (req, res) => {
+    const data = await SlotTemplateService.update(req.params.id, req.body);
+    res.success(data, "Updated");
+  };
 
-    const data = await SlotService.getSlots(placeId);
-
-    return res
-      .status(200)
-      .json(ApiResponse.success(data, "Slots fetched successfully", 200));
-  });
+  static delete = async (req, res) => {
+    await SlotTemplateService.delete(req.params.id);
+    res.success(null, "Deleted");
+  };
 }
 
-export default SlotController;
+class SlotOverrideController {
+  static upsert = async (req, res) => {
+    const data = await SlotOverrideService.upsert(req.body);
+    res.success(data, "Override saved");
+  };
+}
+
+class SlotController {
+  static getByDate = async (req, res) => {
+    const { placeId, date } = req.query;
+
+    const data = await SlotService.getSlotsByDate(placeId, date);
+
+    res.success(data, "Slots fetched");
+  };
+}
+
+export { SlotTemplateController, SlotOverrideController, SlotController };

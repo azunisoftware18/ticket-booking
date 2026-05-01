@@ -29,42 +29,51 @@ model Place {
   name     String
   location String?
 
-  // MAP SUPPORT
   latitude  Float?
   longitude Float?
 
   shortDescription String?
   description      String? @db.LongText
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  slots       Slot[]
   ticketTypes TicketType[]
   tickets     Ticket[]
 
+  slotTemplates SlotTemplate[]
+  slotOverrides SlotOverride[]
+
   @@unique([name, location])
-  @@map("places")
 }
 
 // SLOT
-model Slot {
+model SlotTemplate {
   id      String @id @default(uuid())
   placeId String
 
-  startTime DateTime @map("start_time")
-  endTime   DateTime @map("end_time")
+  startTime String
+  endTime   String
+  capacity  Int
 
-  capacity Int
-  booked   Int @default(0)
+  place Place @relation(fields: [placeId], references: [id])
 
-  createdAt DateTime @default(now()) @map("created_at")
+  @@unique([placeId, startTime])
+}
 
-  place   Place    @relation(fields: [placeId], references: [id])
-  tickets Ticket[]
+model SlotOverride {
+  id String @id @default(uuid())
 
-  @@index([placeId])
-  @@map("slots")
+  placeId   String
+  date      DateTime
+  startTime String
+
+  capacity Int?
+  isClosed Boolean @default(false)
+
+  place Place @relation(fields: [placeId], references: [id])
+
+  @@unique([placeId, date, startTime])
 }
 
 // TICKET TYPES
@@ -89,10 +98,10 @@ model TicketType {
 model Ticket {
   id String @id @default(uuid())
 
-  userId  String  @map("user_id")
-  placeId String  @map("place_id")
-  slotId  String? @map("slot_id") //(pass ke liye null)
-  typeId  String  @map("type_id")
+  userId       String   @map("user_id")
+  placeId      String   @map("place_id")
+  slotDateTime DateTime @map("slot_datetime") //(pass ke liye null)
+  typeId       String   @map("type_id")
 
   bookingType BookingType @default(TICKET)
 
@@ -118,7 +127,6 @@ model Ticket {
 
   user  User       @relation(fields: [userId], references: [id])
   place Place      @relation(fields: [placeId], references: [id])
-  slot  Slot?      @relation(fields: [slotId], references: [id])
   type  TicketType @relation(fields: [typeId], references: [id])
 
   scanLogs ScanLog[]
@@ -126,7 +134,7 @@ model Ticket {
   @@index([qrCode])
   @@index([userId])
   @@index([placeId])
-  @@index([slotId])
+  @@index([slotDateTime])
   @@map("tickets")
 }
 
