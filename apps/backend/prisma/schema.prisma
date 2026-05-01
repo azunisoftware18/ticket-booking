@@ -9,12 +9,15 @@ datasource db {
 
 // USER
 model User {
-  id        String   @id @default(uuid())
-  fullName  String   @map("full_name")
-  role      String   @default("USER")
-  email     String   @unique
-  phone     String?
-  createdAt DateTime @default(now()) @map("created_at")
+  id       String  @id @default(uuid())
+  fullName String  @map("full_name")
+  role     String  @default("USER")
+  email    String  @unique
+  password String?
+
+  refreshToken String?  @map("refresh_token")
+  phone        String?
+  createdAt    DateTime @default(now()) @map("created_at")
 
   tickets Ticket[]
 
@@ -30,12 +33,17 @@ model Place {
   latitude  Float?
   longitude Float?
 
+  shortDescription String?
+  description      String? @db.LongText
+
   createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   slots       Slot[]
   ticketTypes TicketType[]
   tickets     Ticket[]
 
+  @@unique([name, location])
   @@map("places")
 }
 

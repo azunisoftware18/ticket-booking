@@ -1,4 +1,4 @@
-import "dotenv/config"; // 🔥 ensure env loads
+import "dotenv/config";   // ← This must be the FIRST line
 import prisma from "../src/db/db.js";
 import bcrypt from "bcryptjs";
 
@@ -7,29 +7,32 @@ async function main() {
 
   const adminEmail = "admin@example.com";
 
-  const existingAdmin = await prisma.user.findUnique({
-    where: { email: adminEmail },
-  });
+  try {
+    const existingAdmin = await prisma.user.findUnique({
+      where: { email: adminEmail },
+    });
 
-  if (existingAdmin) {
-    console.log("⚠️ Admin already exists");
-    return;
+    if (existingAdmin) {
+      console.log("⚠️ Admin already exists");
+      return;
+    }
+
+    const hashedPassword = await bcrypt.hash("Admin@123", 10);
+
+    const admin = await prisma.user.create({
+      data: {
+        fullName: "Super Admin",
+        email: adminEmail,
+        phone: "9999999999",
+        role: "ADMIN",
+        password: hashedPassword,
+      },
+    });
+
+    console.log("✅ Admin created successfully:", admin.email);
+  } catch (error) {
+    console.error("❌ Error during seeding:", error.message);
   }
-
-  // 🔐 hash password (bcryptjs)
-  const hashedPassword = await bcrypt.hash("Admin@123", 10);
-
-  const admin = await prisma.user.create({
-    data: {
-      fullName: "Super Admin",
-      email: adminEmail,
-      phone: "9999999999",
-      role: "ADMIN",
-      password: hashedPassword,
-    },
-  });
-
-  console.log("✅ Admin created:", admin.email);
 }
 
 main()
