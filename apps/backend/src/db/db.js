@@ -1,17 +1,10 @@
 import { PrismaClient } from "../generated/prisma/index.js";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { createPool } from "mariadb";
+import { envConfig } from "../config/env.config.js";
 
-// Connection pool banao
-const pool = createPool({
-  uri: process.env.DATABASE_URL,
-  connectionLimit: 10,
-});
-
+const pool = createPool({ uri: envConfig.DATABASE_URL });
 const adapter = new PrismaMariaDb(pool);
 
-const prisma = new PrismaClient({
-  adapter,
-});
-
+const prisma = new PrismaClient({ adapter });
 export default prisma;

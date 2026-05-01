@@ -21,43 +21,84 @@ model User {
   @@map("users")
 }
 
-// EVENT / ROUTE
-model Event {
-  id        String    @id @default(uuid())
-  title     String
-  location  String?
-  price     Float
-  startTime DateTime  @map("start_time")
-  endTime   DateTime? @map("end_time")
-  createdAt DateTime  @default(now()) @map("created_at")
+model Place {
+  id       String  @id @default(uuid())
+  name     String
+  location String?
 
-  tickets Ticket[]
+  // MAP SUPPORT
+  latitude  Float?
+  longitude Float?
 
-  @@map("events")
-}
-
-// GATE (ENTRY / EXIT)
-model Gate {
-  id        String   @id @default(uuid())
-  name      String
-  type      GateType
-  location  String?
   createdAt DateTime @default(now()) @map("created_at")
 
-  @@map("gates")
+  slots       Slot[]
+  ticketTypes TicketType[]
+  tickets     Ticket[]
+
+  @@map("places")
+}
+
+// SLOT
+model Slot {
+  id      String @id @default(uuid())
+  placeId String
+
+  startTime DateTime @map("start_time")
+  endTime   DateTime @map("end_time")
+
+  capacity Int
+  booked   Int @default(0)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  place   Place    @relation(fields: [placeId], references: [id])
+  tickets Ticket[]
+
+  @@index([placeId])
+  @@map("slots")
+}
+
+// TICKET TYPES
+model TicketType {
+  id      String @id @default(uuid())
+  name    String // Adult, Child, Foreign
+  price   Float
+  placeId String @map("place_id")
+
+  maxPerBooking Int @default(6)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  place   Place    @relation(fields: [placeId], references: [id])
+  tickets Ticket[]
+
+  @@index([placeId])
+  @@map("ticket_types")
 }
 
 // TICKET
 model Ticket {
-  id      String @id @default(uuid())
-  userId  String
-  eventId String
+  id String @id @default(uuid())
 
-  qrCode String @unique
+  userId  String  @map("user_id")
+  placeId String  @map("place_id")
+  slotId  String? @map("slot_id") //(pass ke liye null)
+  typeId  String  @map("type_id")
+
+  bookingType BookingType @default(TICKET)
+
+  qrCode String @unique @map("qr_code")
 
   status TicketFlowStatus @default(PENDING)
 
-  entryGateId String? @map("entry_gatev_id")
+  // PASS SUPPORT
+  validFrom   DateTime?
+  validTill   DateTime?
+  maxEntries  Int?
+  usedEntries Int       @default(0)
+
+  entryGateId String? @map("entry_gate_id")
   exitGateId  String? @map("exit_gate_id")
 
   entryAt DateTime? @map("entry_at")
@@ -67,19 +108,39 @@ model Ticket {
 
   createdAt DateTime @default(now()) @map("created_at")
 
-  user     User      @relation(fields: [userId], references: [id])
-  event    Event     @relation(fields: [eventId], references: [id])
+  user  User       @relation(fields: [userId], references: [id])
+  place Place      @relation(fields: [placeId], references: [id])
+  slot  Slot?      @relation(fields: [slotId], references: [id])
+  type  TicketType @relation(fields: [typeId], references: [id])
+
   scanLogs ScanLog[]
 
   @@index([qrCode])
   @@index([userId])
-  @@index([eventId])
+  @@index([placeId])
+  @@index([slotId])
   @@map("tickets")
 }
 
-// SCAN LOG (VERY IMPORTANT)
+// GATE
+model Gate {
+  id   String   @id @default(uuid())
+  name String
+  type GateType
+
+  // optional geo
+  latitude  Float?
+  longitude Float?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("gates")
+}
+
+// SCAN LOG
 model ScanLog {
-  id       String   @id @default(uuid())
+  id String @id @default(uuid())
+
   ticketId String   @map("ticket_id")
   gateId   String   @map("gate_id")
   type     GateType
@@ -94,14 +155,19 @@ model ScanLog {
 
 // ENUMS
 enum TicketFlowStatus {
-  PENDING // booked but not used
-  IN_PROGRESS // entry done
-  COMPLETED // exit done
-  EXPIRED // expired
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  EXPIRED
   CANCELLED
 }
 
 enum GateType {
   ENTRY
   EXIT
+}
+
+enum BookingType {
+  TICKET
+  PASS
 }

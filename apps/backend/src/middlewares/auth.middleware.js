@@ -1,31 +1,56 @@
 import jwt from "jsonwebtoken";
-import { envConfig } from "../config/env.config";
 import prisma from "../db/db.js";
+import { ApiError } from "../utils/ApiError.js";
+import { envConfig } from "../config/env.config.js";
 
-export const authMiddleware = (req, res, next) => {
-  const token =
-    req.headers["authorization"]?.replace("Bearer ", "") ||
-    req.cookes?.accessToken;
+class AuthMiddleware {
+  static isAuthenticated = async (req, res, next) => {
+    try {
+      const token =
+        req.headers["authorization"]?.replace("Bearer ", "") ||
+        req.cookies?.accessToken;
 
-  if (!token) return res.status(401).json({ message: "No token" });
-
-  try {
-    const decoded = jwt.verify(token, envConfig.ACCESS_TOKEN_SECRET);
-     const userExists = await prisma.user.findUnique({
-      where: { id: decoded.id },
-      select: {
-        role: true,
-        email: true,
-        phone: true
+      if (!token) {
+        throw ApiError.unauthorized("No token provided");
       }
-    });
 
-    if (!userExists) {
-      throw ApiError.unauthorized("Unauthorized: Invalid token user");
+      const decoded = jwt.verify(token, envConfig.ACCESS_TOKEN_SECRET);
+
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.id },
+        select: {
+          id: true,
+          role: true,
+          email: true,
+          phone: true,
+        },
+      });
+
+      if (!user) {
+        throw ApiError.unauthorized("Invalid token user");
+      }
+
+      req.user = user;
+
+      next();
+    } catch (error) {
+      next(error);
     }
-    req.user =  userExists
-    next();
-  } catch (err) {
-    return res.status(403).json({ message: "Invalid token" });
-  }
-};
+  };
+
+  static authorize = (roles = []) => {
+    return (req, res, next) => {
+      if (!req.user) {
+        return next(ApiError.unauthorized("User not authenticated"));
+      }
+
+      if (!roles.includes(req.user.role)) {
+        return next(ApiError.forbidden("Access denied"));
+      }
+
+      next();
+    };
+  };
+}
+
+export default AuthMiddleware;
