@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import prisma from "../db/db.js";
 import { ApiError } from "../utils/ApiError.js";
 import { envConfig } from "../config/env.config.js";
+import { log } from "node:console";
 
 class AuthMiddleware {
   static isAuthenticated = async (req, res, next) => {
