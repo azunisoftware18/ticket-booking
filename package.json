@@ -13,5 +13,8 @@
   },
   "devDependencies": {
     "turbo": "^2.9.6"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
   }
 }
