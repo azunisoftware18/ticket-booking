@@ -77,7 +77,6 @@ class PlaceService {
     return await prisma.place.update({
       where: { id },
       data: payload,
-      updateAt: new Date(),
     });
   }
 
