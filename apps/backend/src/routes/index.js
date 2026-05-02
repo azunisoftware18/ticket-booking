@@ -3,6 +3,7 @@ import bookingRoute from "./booking.routes.js";
 import slotRoute from "./slot.routes.js";
 import authRoute from "./auth.routes.js";
 import placeRoute from "./place.routes.js";
+import ticketTypeRoute from "./ticketType.routes.js";
 
 const router = Router();
 
@@ -11,5 +12,6 @@ router.use("/auth", authRoute);
 router.use("/place", placeRoute);
 router.use("/booking", bookingRoute);
 router.use("/slot", slotRoute);
+router.use("/ticket-type", ticketTypeRoute);
 
 export default router;

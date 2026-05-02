@@ -19,7 +19,8 @@ model User {
   phone        String?
   createdAt    DateTime @default(now()) @map("created_at")
 
-  tickets Ticket[]
+  tickets  Ticket[]
+  bookings Booking[]
 
   @@map("users")
 }
@@ -29,58 +30,101 @@ model Place {
   name     String
   location String?
 
-  // MAP SUPPORT
   latitude  Float?
   longitude Float?
 
   shortDescription String?
   description      String? @db.LongText
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  slots       Slot[]
   ticketTypes TicketType[]
   tickets     Ticket[]
+
+  slotTemplates SlotTemplate[]
+  slotOverrides SlotOverride[]
+  bookings      Booking[]
 
   @@unique([name, location])
   @@map("places")
 }
 
 // SLOT
-model Slot {
+model SlotTemplate {
   id      String @id @default(uuid())
   placeId String
 
-  startTime DateTime @map("start_time")
-  endTime   DateTime @map("end_time")
+  startTime String
+  endTime   String
+  capacity  Int
 
-  capacity Int
-  booked   Int @default(0)
+  place Place @relation(fields: [placeId], references: [id])
 
-  createdAt DateTime @default(now()) @map("created_at")
+  @@unique([placeId, startTime])
+}
 
-  place   Place    @relation(fields: [placeId], references: [id])
+model SlotOverride {
+  id String @id @default(uuid())
+
+  placeId   String
+  date      DateTime
+  startTime String
+
+  capacity Int?
+  isClosed Boolean @default(false)
+
+  place Place @relation(fields: [placeId], references: [id])
+
+  @@unique([placeId, date, startTime])
+}
+
+model Booking {
+  id String @id @default(uuid())
+
+  userId String?
+
+  placeId      String
+  slotDateTime DateTime
+
+  // CUSTOMER DETAILS
+  name  String
+  email String
+  phone String
+
+  totalAmount Float
+  status      String @default("PENDING") // PENDING, PAID, FAILED
+
+  txnId     String? @map("txn_id") // system txn id
+  paymentId String? @map("payment_id") // provider txn id
+
+  createdAt DateTime @default(now())
+
+  user  User? @relation(fields: [userId], references: [id])
+  place Place @relation(fields: [placeId], references: [id])
+
   tickets Ticket[]
 
-  @@index([placeId])
-  @@map("slots")
+  @@index([placeId, status, txnId])
+  @@map("bookings")
 }
 
 // TICKET TYPES
 model TicketType {
   id      String @id @default(uuid())
-  name    String // Adult, Child, Foreign
+  name    String @unique // Adult, Child, Foreign
   price   Float
   placeId String @map("place_id")
 
   maxPerBooking Int @default(6)
 
   createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   place   Place    @relation(fields: [placeId], references: [id])
   tickets Ticket[]
 
+  @@unique([name, placeId])
   @@index([placeId])
   @@map("ticket_types")
 }
@@ -89,44 +133,25 @@ model TicketType {
 model Ticket {
   id String @id @default(uuid())
 
-  userId  String  @map("user_id")
-  placeId String  @map("place_id")
-  slotId  String? @map("slot_id") //(pass ke liye null)
-  typeId  String  @map("type_id")
+  bookingId String  @map("booking_id")
+  userId    String? @map("user_id")
+  placeId   String  @map("place_id")
 
-  bookingType BookingType @default(TICKET)
+  slotDateTime DateTime @map("slot_date_time")
+  typeId       String   @map("type_id")
 
   qrCode String @unique @map("qr_code")
 
   status TicketFlowStatus @default(PENDING)
 
-  // PASS SUPPORT
-  validFrom   DateTime?
-  validTill   DateTime?
-  maxEntries  Int?
-  usedEntries Int       @default(0)
+  booking Booking    @relation(fields: [bookingId], references: [id])
+  type    TicketType @relation(fields: [typeId], references: [id])
 
-  entryGateId String? @map("entry_gate_id")
-  exitGateId  String? @map("exit_gate_id")
+  createdAt DateTime  @default(now()) @map("created_at")
+  user      User?     @relation(fields: [userId], references: [id])
+  place     Place     @relation(fields: [placeId], references: [id])
+  scanLogs  ScanLog[]
 
-  entryAt DateTime? @map("entry_at")
-  exitAt  DateTime? @map("exit_at")
-
-  expiresAt DateTime @map("expires_at")
-
-  createdAt DateTime @default(now()) @map("created_at")
-
-  user  User       @relation(fields: [userId], references: [id])
-  place Place      @relation(fields: [placeId], references: [id])
-  slot  Slot?      @relation(fields: [slotId], references: [id])
-  type  TicketType @relation(fields: [typeId], references: [id])
-
-  scanLogs ScanLog[]
-
-  @@index([qrCode])
-  @@index([userId])
-  @@index([placeId])
-  @@index([slotId])
   @@map("tickets")
 }
 
