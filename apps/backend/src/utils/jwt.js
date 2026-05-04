@@ -8,7 +8,7 @@ export const generateAccessToken = (user) => {
       role: user.role,
     },
     envConfig.ACCESS_TOKEN_SECRET,
-    { expiresIn: envConfig.ACCESS_TOKEN_EXPIRES_IN || "15m" }
+    { expiresIn: envConfig.ACCESS_TOKEN_EXPIRES_IN || "1d" }
   );
 };
 

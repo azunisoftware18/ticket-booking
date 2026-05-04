@@ -79,36 +79,6 @@ model SlotOverride {
   @@unique([placeId, date, startTime])
 }
 
-model Booking {
-  id String @id @default(uuid())
-
-  userId String?
-
-  placeId      String
-  slotDateTime DateTime
-
-  // CUSTOMER DETAILS
-  name  String
-  email String
-  phone String
-
-  totalAmount Float
-  status      String @default("PENDING") // PENDING, PAID, FAILED
-
-  txnId     String? @map("txn_id") // system txn id
-  paymentId String? @map("payment_id") // provider txn id
-
-  createdAt DateTime @default(now())
-
-  user  User? @relation(fields: [userId], references: [id])
-  place Place @relation(fields: [placeId], references: [id])
-
-  tickets Ticket[]
-
-  @@index([placeId, status, txnId])
-  @@map("bookings")
-}
-
 // TICKET TYPES
 model TicketType {
   id      String @id @default(uuid())
@@ -129,6 +99,35 @@ model TicketType {
   @@map("ticket_types")
 }
 
+model Booking {
+  id String @id @default(uuid())
+
+  userId       String?  @map("user_id")
+  placeId      String   @map("place_id")
+  slotDateTime DateTime @map("slot_date_time")
+
+  bookingType BookingType @default(TICKET)
+
+  name  String
+  email String
+  phone String
+
+  totalAmount Float
+  totalSeats  Int // ✅ ADD THIS
+
+  status    String    @default("PENDING")
+  expiresAt DateTime?
+
+  txnId     String? @unique // ✅ IMPORTANT UNIQUE
+  paymentId String?
+
+  createdAt DateTime @default(now())
+
+  tickets Ticket[]
+  user    User?    @relation(fields: [userId], references: [id])
+  place   Place    @relation(fields: [placeId], references: [id])
+}
+
 // TICKET
 model Ticket {
   id String @id @default(uuid())
@@ -142,7 +141,7 @@ model Ticket {
 
   qrCode String @unique @map("qr_code")
 
-  status TicketFlowStatus @default(PENDING)
+  status String @default("PENDING") // PENDING, SCANNED, EXPIRED
 
   booking Booking    @relation(fields: [bookingId], references: [id])
   type    TicketType @relation(fields: [typeId], references: [id])
@@ -184,15 +183,6 @@ model ScanLog {
 
   @@index([ticketId])
   @@map("scan_logs")
-}
-
-// ENUMS
-enum TicketFlowStatus {
-  PENDING
-  IN_PROGRESS
-  COMPLETED
-  EXPIRED
-  CANCELLED
 }
 
 enum GateType {
