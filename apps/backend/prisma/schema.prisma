@@ -45,6 +45,7 @@ model Place {
   slotTemplates SlotTemplate[]
   slotOverrides SlotOverride[]
   bookings      Booking[]
+  addons        Addon[]
 
   @@unique([name, location])
   @@map("places")
@@ -53,30 +54,32 @@ model Place {
 // SLOT
 model SlotTemplate {
   id      String @id @default(uuid())
-  placeId String
+  placeId String @map("place_id")
 
-  startTime String
-  endTime   String
-  capacity  Int
+  startTime String @map("start_time")
+  endTime   String @map("end_time")
+  capacity  Int    @map("capacity")
 
   place Place @relation(fields: [placeId], references: [id])
 
   @@unique([placeId, startTime])
+  @@map("slot_templates")
 }
 
 model SlotOverride {
   id String @id @default(uuid())
 
-  placeId   String
+  placeId   String   @map("place_id")
   date      DateTime
-  startTime String
+  startTime String   @map("start_time")
 
   capacity Int?
-  isClosed Boolean @default(false)
+  isClosed Boolean @default(false) @map("is_closed")
 
   place Place @relation(fields: [placeId], references: [id])
 
   @@unique([placeId, date, startTime])
+  @@map("slot_overrides")
 }
 
 // TICKET TYPES
@@ -86,7 +89,7 @@ model TicketType {
   price   Float
   placeId String @map("place_id")
 
-  maxPerBooking Int @default(6)
+  maxPerBooking Int @default(6) @map("max_per_booking")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -99,6 +102,39 @@ model TicketType {
   @@map("ticket_types")
 }
 
+model Addon {
+  id String @id @default(uuid())
+
+  name  String // GUIDE, CAMERA, SAFARI
+  price Float
+
+  isActive Boolean @default(true) @map("is_active") // visible or not in booking 
+
+  placeId String @map("place_id")
+  place   Place  @relation(fields: [placeId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  bookings BookingAddon[]
+
+  @@unique([name, placeId])
+  @@map("addons")
+}
+
+model BookingAddon {
+  id String @id @default(uuid())
+
+  bookingId String @map("booking_id")
+  addonId   String @map("addon_id")
+
+  quantity Int @default(1)
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+  addon   Addon   @relation(fields: [addonId], references: [id])
+
+  @@map("booking_addons")
+}
+
 model Booking {
   id String @id @default(uuid())
 
@@ -106,26 +142,27 @@ model Booking {
   placeId      String   @map("place_id")
   slotDateTime DateTime @map("slot_date_time")
 
-  bookingType BookingType @default(TICKET)
+  bookingType BookingType @default(TICKET) @map("booking_type")
 
   name  String
   email String
   phone String
 
-  totalAmount Float
-  totalSeats  Int // ✅ ADD THIS
+  totalAmount Float @map("total_amount")
+  totalSeats  Int   @map("total_seats") // ✅ ADD THIS
 
   status    String    @default("PENDING")
-  expiresAt DateTime?
+  expiresAt DateTime? @map("expires_at")
 
-  txnId     String? @unique // ✅ IMPORTANT UNIQUE
-  paymentId String?
+  txnId     String? @unique @map("txn_id") // ✅ IMPORTANT UNIQUE
+  paymentId String? @map("payment_id")
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
 
-  tickets Ticket[]
-  user    User?    @relation(fields: [userId], references: [id])
-  place   Place    @relation(fields: [placeId], references: [id])
+  tickets       Ticket[]
+  user          User?          @relation(fields: [userId], references: [id])
+  place         Place          @relation(fields: [placeId], references: [id])
+  bookingAddons BookingAddon[]
 }
 
 // TICKET
