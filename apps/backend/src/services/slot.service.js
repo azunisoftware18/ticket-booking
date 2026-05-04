@@ -30,6 +30,7 @@ class SlotTemplateService {
   }
 
   static async getAll(placeId) {
+    console.log("Fetching slot templates for placeId:", placeId);
     return prisma.slotTemplate.findMany({
       where: { placeId },
       orderBy: { startTime: "asc" },
@@ -85,8 +86,20 @@ class SlotService {
       where: { placeId },
     });
 
+    console.log(placeId,date);
+    
+
+    const start = new Date(`${date}T00:00:00.000Z`);
+    const end = new Date(`${date}T23:59:59.999Z`);
+
     const overrides = await prisma.slotOverride.findMany({
-      where: { placeId, date: new Date(date) },
+      where: {
+        placeId,
+        date: {
+          gte: start,
+          lte: end,
+        },
+      },
     });
 
     const bookings = await prisma.ticket.groupBy({

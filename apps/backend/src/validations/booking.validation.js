@@ -3,29 +3,36 @@ import { z } from "zod";
 class BookingValidation {
   static get createBooking() {
     return z.object({
-      eventId: z.string().uuid(),
-      slotId: z.string().uuid(),
+      placeId: z.string().uuid(),
+      slotDateTime: z.string(),
 
-      tickets: z
-        .array(
-          z.object({
-            typeId: z.string().uuid(),
-            quantity: z.number().min(1).max(6),
-          })
-        )
-        .min(1),
+      bookingType: z.enum(["TICKET", "PASS"]).optional(),
 
-      fullName: z.string().min(2),
+      name: z.string().min(2),
       email: z.string().email(),
       phone: z.string().min(10),
+
+      tickets: z.array(
+        z.object({
+          typeId: z.string().uuid(),
+          quantity: z.number().min(1),
+        })
+      ),
     });
   }
 
-  static get scanTicket() {
+  static get paymentSuccess() {
     return z.object({
-      qrCode: z.string(),
-      gateId: z.string().uuid(),
-      type: z.enum(["ENTRY", "EXIT"]),
+      txnid: z.string(),
+      easepayid: z.string(),
+      status: z.string(),
+      hash: z.string(),
+    });
+  }
+
+  static get paymentFailure() {
+    return z.object({
+      txnid: z.string().min(5),
     });
   }
 }

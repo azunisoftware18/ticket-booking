@@ -35,7 +35,7 @@ class SlotOverrideController {
 
 class SlotController {
   static getByDate = async (req, res) => {
-    const { placeId, date } = req.query;
+    const { placeId, date } = req.params;
 
     const data = await SlotService.getSlotsByDate(placeId, date);
 

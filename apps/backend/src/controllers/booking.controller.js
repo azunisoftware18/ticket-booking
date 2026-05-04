@@ -3,18 +3,29 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 
 class BookingController {
   static create = async (req, res) => {
-    const data = await BookingService.createBooking(req.body);
+    const data = await BookingService.createBooking(req.body, req.user);
 
-    return res
-      .status(201)
-      .json(ApiResponse.success(data, "Booking successful", 201));
+    return res.status(200).json(ApiResponse.success(data, "Booking initiated"));
   };
 
-  static scan = async (req, res) => {
-    const data = await BookingService.scanTicket(req.body);
+  static success = async (req, res) => {
+    const data = await BookingService.paymentSuccess(req.body);
 
-    return res.status(200).json(ApiResponse.success(data, "Scan success", 200));
+    return res.send("Payment Success ✅");
   };
+
+  static failure = async (req, res) => {
+    await BookingService.paymentFailure(req.body);
+
+    return res.send("Payment Failed ❌");
+  };
+
+  static async cancelBooking(req, res) {
+    const { id } = req.params;
+
+    await BookingService.cancelBooking(id, req.user);
+    return res.json(ApiResponse.success(null, "Booking cancelled"));
+  }
 }
 
 export default BookingController;

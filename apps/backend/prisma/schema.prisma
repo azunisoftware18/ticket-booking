@@ -186,15 +186,6 @@ model ScanLog {
   @@map("scan_logs")
 }
 
-// ENUMS
-enum TicketFlowStatus {
-  PENDING
-  IN_PROGRESS
-  COMPLETED
-  EXPIRED
-  CANCELLED
-}
-
 enum GateType {
   ENTRY
   EXIT
