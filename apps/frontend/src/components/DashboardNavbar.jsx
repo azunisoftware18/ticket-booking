@@ -3,19 +3,39 @@
 import React from "react";
 import { User, ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
+import { useSelector } from "react-redux";
+import { usePathname } from "next/navigation";
 
 export default function DashboardNavbar() {
+  const { user } = useSelector((state) => state.auth);
+  const pathname = usePathname();
+
+  const getPageTitle = (pathname) => {
+    if (pathname === "/dashboard") return "Dashboard";
+    if (pathname === "/dashboard/place") return "Place";
+    if (pathname === "/dashboard/slots") return "Slots";
+    return "Dashboard";
+  };
+
   return (
     <nav 
       style={{ 
         backgroundColor: "var(--background)", 
         borderColor: "var(--border)" 
       }}
-      className="h-20 px-8 flex items-center justify-end border-b sticky top-0 z-40"
+      className="h-20 px-8 flex items-center justify-between border-b sticky top-0 z-40"
     >
+      {/* 🔥 LEFT SIDE - PAGE TITLE */}
+      <h1 
+        style={{ color: "var(--foreground)" }}
+        className="text-xl font-bold tracking-tight"
+      >
+        {getPageTitle(pathname)}
+      </h1>
+
+      {/* 🔥 RIGHT SIDE - USER */}
       <div className="flex items-center gap-6">
-        
-        {/* User Profile Section */}
+
         <motion.div
           whileHover={{ scale: 1.02 }}
           style={{ 
@@ -24,7 +44,6 @@ export default function DashboardNavbar() {
           }}
           className="flex items-center gap-3 pl-2 pr-4 py-2 rounded-2xl border cursor-pointer hover:opacity-90 transition-all shadow-sm"
         >
-          {/* Avatar Icon Container: Using Primary Color */}
           <div 
             style={{ backgroundColor: "var(--primary)" }}
             className="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm shadow-black/5"
@@ -33,19 +52,18 @@ export default function DashboardNavbar() {
           </div>
 
           <div className="hidden lg:block text-left">
-            {/* Name: Using Foreground Color */}
             <p 
               style={{ color: "var(--foreground)" }}
               className="text-sm font-bold leading-none tracking-tight"
             >
-              Sohail Khan
+              {user?.fullName || "Loading..."}
             </p>
-            {/* Role: Using Muted Foreground */}
+
             <p 
               style={{ color: "var(--muted-foreground)" }}
               className="text-[10px] font-bold uppercase mt-1 tracking-wider"
             >
-              Super Admin
+              {user?.role || ""}
             </p>
           </div>
 
