@@ -1,95 +1,63 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Menu, X, MapPin, Search, Globe, ArrowRight } from 'lucide-react';
-import Button from './ui/Button';
-import { useRouter } from 'next/navigation';
+import React, { useState } from "react";
+import { Menu, X, ArrowRight } from "lucide-react";
+import Button from "./ui/Button"; // Make sure path is correct
+import { useRouter } from "next/navigation";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
-  // const navLinks = [
-  //   { name: 'Destinations', href: '#' },
-  //   { name: 'Hotels', href: '#' },
-  //   { name: 'Packages', href: '#' },
-  //   { name: 'Contact', href: '#' },
-  // ];
-
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/90 backdrop-blur-md">
-      <div className="mx-auto w-full px-4 sm:px-6 lg:px-8">
-        <div className="flex h-20 items-center justify-between">
-          
-          {/* LEFT SIDE: Logo */}
-          <div className="flex items-center group cursor-pointer">
-            <MapPin className="text-[#FF70BF] group-hover:scale-110 transition-transform mr-1.5" size={24} />
-            <span className="text-2xl font-extrabold tracking-tight text-gray-900">
-              Go<span className="text-[#FF70BF]">Ticket</span>
-            </span>
+    // "absolute" use kiya hai taaki ye Hero image ke upar float kare
+    <header className="absolute top-0 z-50 w-full bg-transparent">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-24 items-center justify-between">
+          {/* LEFT: Logo Section */}
+          <div className="flex items-center gap-3 cursor-pointer">
+            <div className="bg-white p-2 rounded-full shadow-md">
+              <img
+                src="/logo.jpg"
+                alt="Logo"
+                className="h-10 w-10 object-contain"
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xl font-bold leading-tight text-white uppercase tracking-wider">
+                Elevated
+              </span>
+              <span className="text-lg font-medium leading-tight text-white/90">
+                Nature Trail
+              </span>
+            </div>
           </div>
 
-          {/* CENTER: Navigation Links */}
-          {/* <nav className="hidden md:block">
-            <ul className="flex items-center gap-8">
-              {navLinks.map((link) => (
-                <li key={link.name}>
-                  <a 
-                    href={link.href} 
-                    className="text-sm font-semibold text-gray-600 hover:text-[#D552A3] transition-colors"
-                  >
-                    {link.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav> */}
-
-          {/* RIGHT SIDE: Utility Icons & Book Now Button */}
-          <div className="flex items-center gap-6">
-            {/* Search & Globe Icons */}
-            {/* <div className="hidden sm:flex items-center gap-4 text-gray-400">
-              <Search size={20} className="hover:text-[#FF70BF] cursor-pointer transition-colors" />
-              <Globe size={20} className="hover:text-[#FF70BF] cursor-pointer transition-colors" />
-            </div> */}
-
-            {/* Book Now Button (Ab ye end mein hai) */}
+          {/* RIGHT: Language & Action Button */}
+          <div className="flex items-center gap-4">
             <div className="hidden lg:block">
-              <Button icon={ArrowRight} text="Book Now" onClick={() => router.push('/book-tickets')}/>
+              {/* Yellow Button like screenshot */}
+              <button
+                onClick={() => router.push("/book-tickets")}
+                className="flex items-center gap-2 bg-[#F2D64B] hover:bg-[#e2c53d] text-black font-bold py-3 px-6 rounded-lg transition-all shadow-lg"
+              >
+                Book Now
+                <div className="bg-black rounded-full p-1">
+                  <ArrowRight size={16} className="text-[#F2D64B]" />
+                </div>
+              </button>
             </div>
 
-            {/* Mobile Menu Button */}
-            <button 
-              onClick={() => setIsOpen(!isOpen)} 
-              className="md:hidden text-gray-600 hover:text-[#FF70BF] transition-colors"
+            {/* Mobile Menu */}
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="lg:hidden text-white p-2"
             >
-              {isOpen ? <X size={28} /> : <Menu size={28} />}
+              {isOpen ? <X size={30} /> : <Menu size={30} />}
             </button>
           </div>
         </div>
       </div>
-
-      {/* Mobile Menu */}
-      {isOpen && (
-        <div className="absolute inset-x-0 top-20 bg-white p-6 shadow-2xl md:hidden border-t border-gray-50">
-          <div className="flex flex-col gap-5">
-            {/* Mobile mein button top par rakha hai for quick action */}
-            <Button icon={ArrowRight} text="Book Now" className="w-full" onClick={() => router.push('/book-tickets')} />
-            
-            <div className="flex flex-col gap-4 mt-2">
-              {navLinks.map((link) => (
-                <a 
-                  key={link.name} 
-                  href={link.href} 
-                  className="text-lg font-medium text-gray-800 border-b border-gray-50 pb-2 hover:text-[#FF70BF]"
-                >
-                  {link.name}
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </header>
   );
 }
