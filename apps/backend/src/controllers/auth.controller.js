@@ -10,12 +10,10 @@ class AuthController {
 
     res.cookie("accessToken", accessToken, {
       ...cookieOptions,
-      maxAge: 15 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
       ...cookieOptions,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return res
@@ -41,6 +39,10 @@ class AuthController {
 
   static logout = async (req, res) => {
     await AuthService.logout(req.user.id);
+
+    res.clearCookie("accessToken", cookieOptions);
+
+    res.clearCookie("refreshToken", cookieOptions);
 
     return res
       .status(200)
