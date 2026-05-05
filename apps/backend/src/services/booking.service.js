@@ -11,6 +11,7 @@ class BookingService {
       placeId,
       slotDateTime,
       tickets,
+      addons,
       name,
       email,
       phone,
@@ -40,6 +41,31 @@ class BookingService {
           totalAmount += type.price * t.quantity;
           totalSeats += t.quantity;
         });
+
+        const addonIds = addons?.map((a) => a.addonId) || [];
+
+        const addonList = await tx.addon.findMany({
+          where: {
+            id: { in: addonIds },
+            placeId,
+            isActive: true,
+          },
+        });
+
+        if (addons?.length) {
+          if (addonList.length !== addons.length) {
+            throw ApiError.badRequest("Invalid or inactive addon");
+          }
+        }
+
+        let addonAmount = 0;
+
+        addons?.forEach((a) => {
+          const addon = addonList.find((x) => x.id === a.addonId);
+          addonAmount += addon.price * a.quantity;
+        });
+
+        const finalAmount = totalAmount + addonAmount;
 
         const capacity = await this.getSlotCapacity(tx, placeId, slotDateTime);
 
@@ -71,7 +97,7 @@ class BookingService {
             name,
             email,
             phone,
-            totalAmount,
+            totalAmount: finalAmount,
             totalSeats,
             bookingType,
             txnId,
@@ -80,11 +106,21 @@ class BookingService {
           },
         });
 
+        // 🔥 SAVE ADDONS
+        if (addons?.length) {
+          await tx.bookingAddon.createMany({
+            data: addons.map((a) => ({
+              bookingId: booking.id,
+              addonId: a.addonId,
+              quantity: a.quantity,
+            })),
+          });
+        }
+
         const key = envConfig.EASEBUZZ_KEY;
         const salt = envConfig.EASEBUZZ_SALT;
 
-        const hashString = `${key}|${txnId}|${totalAmount}|Ticket Booking|${name}|${email}|||||||||||${salt}`;
-
+        const hashString = `${key}|${txnId}|${finalAmount}|Ticket Booking|${name}|${email}|||||||||||${salt}`;
         const hash = crypto
           .createHash("sha512")
           .update(hashString)
@@ -94,7 +130,7 @@ class BookingService {
           booking,
           payment: {
             txnid: txnId,
-            amount: totalAmount,
+            amount: finalAmount,
             firstname: name,
             email,
             phone,
