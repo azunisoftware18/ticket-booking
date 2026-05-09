@@ -42,7 +42,7 @@ class BookingService {
           totalSeats += t.quantity;
         });
 
-        const addonIds = addons?.map((a) => a.addonId) || [];
+        const addonIds = addons || [];
 
         const addonList = await tx.addon.findMany({
           where: {
@@ -60,10 +60,9 @@ class BookingService {
 
         let addonAmount = 0;
 
-        addons?.forEach((a) => {
-          const addon = addonList.find((x) => x.id === a.addonId);
-          addonAmount += addon.price * a.quantity;
-        });
+        addonList.forEach((addon) => {
+  addonAmount += addon.price;
+});
 
         const finalAmount = totalAmount + addonAmount;
 
@@ -92,30 +91,34 @@ class BookingService {
         const booking = await tx.booking.create({
           data: {
             userId: user?.id,
+
             placeId,
+
             slotDateTime: new Date(slotDateTime),
+
             name,
             email,
             phone,
+
             totalAmount: finalAmount,
+
             totalSeats,
+
             bookingType,
+
             txnId,
+
             status: "PENDING",
+
             expiresAt,
+
+            // ✅ SAVE REQUESTED TICKETS
+            ticketPayload: tickets,
+            addonIds: addons || [],
           },
         });
 
-        // 🔥 SAVE ADDONS
-        if (addons?.length) {
-          await tx.bookingAddon.createMany({
-            data: addons.map((a) => ({
-              bookingId: booking.id,
-              addonId: a.addonId,
-              quantity: a.quantity,
-            })),
-          });
-        }
+
 
         const key = envConfig.EASEBUZZ_KEY;
         const salt = envConfig.EASEBUZZ_SALT;
@@ -139,7 +142,7 @@ class BookingService {
             furl: `${envConfig.BASE_URL}/api/booking/failure`,
             key,
             hash,
-            url: "https://pay.easebuzz.in/payment/initiateLink",
+            url: "https://testpay.easebuzz.in/pay/secure",
           },
         };
       },
@@ -149,35 +152,81 @@ class BookingService {
 
   static async paymentSuccess(data) {
     const booking = await prisma.booking.findUnique({
-      where: { txnId: data.txnid },
+      where: {
+        txnId: data.txnid,
+      },
     });
 
-    if (!booking) throw ApiError.notFound("Booking not found");
+    if (!booking) {
+      throw ApiError.notFound("Booking not found");
+    }
 
-    // 🔐 verify using gateway data only
+    // ✅ HASH VERIFY
     if (!this.verifyHash(data)) {
       throw ApiError.badRequest("Invalid payment");
     }
 
+    // ✅ PAYMENT STATUS
     if (data.status.toLowerCase() !== "success") {
-      throw ApiError.badRequest("Payment not successful");
+      throw ApiError.badRequest("Payment failed");
     }
 
-    if (booking.status === "PAID") return booking;
-
-    if (booking.expiresAt < new Date()) {
-      throw ApiError.badRequest("Booking expired");
+    // ✅ ALREADY PAID
+    if (booking.status === "PAID") {
+      return booking;
     }
 
-    const updated = await prisma.booking.update({
-      where: { txnId: data.txnid },
+    // ✅ UPDATE BOOKING
+    const updatedBooking = await prisma.booking.update({
+      where: {
+        txnId: data.txnid,
+      },
+
       data: {
         status: "PAID",
+
         paymentId: data.easepayid,
       },
     });
 
-    return updated;
+    // 🔥 GET ORIGINAL BOOKING DATA
+    const originalBooking = await prisma.booking.findUnique({
+      where: {
+        id: booking.id,
+      },
+
+      include: {
+        place: true,
+      },
+    });
+
+    // 🔥 GET TICKET TYPES
+    const ticketPayload = booking.ticketPayload || [];
+
+    // 🔥 CREATE TICKETS
+    for (const item of ticketPayload) {
+      for (let i = 0; i < item.quantity; i++) {
+        await prisma.ticket.create({
+          data: {
+            bookingId: booking.id,
+
+            userId: booking.userId,
+
+            placeId: booking.placeId,
+
+            slotDateTime: booking.slotDateTime,
+
+            typeId: item.typeId,
+
+            qrCode: crypto.randomUUID(),
+
+            status: "PENDING",
+          },
+        });
+      }
+    }
+
+    return updatedBooking;
   }
 
   static async paymentFailure(data) {
@@ -282,6 +331,56 @@ class BookingService {
 
     return qrImage;
   }
+
+  static async getAllBookings() {
+    return await prisma.booking.findMany({
+      include: {
+        place: true,
+        user: true,
+        tickets: {
+          include: {
+            type: true,
+          },
+        },
+      },
+
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }
+  static async getBookingById(id) {
+
+  const booking = await prisma.booking.findUnique({
+    where: {
+      id,
+    },
+
+    include: {
+      place: true,
+
+      user: true,
+
+      tickets: {
+        include: {
+          type: true,
+        },
+      },
+
+      bookingAddons: {
+        include: {
+          addon: true,
+        },
+      },
+    },
+  });
+
+  if (!booking) {
+    throw ApiError.notFound("Booking not found");
+  }
+
+  return booking;
+}
 }
 
 export default BookingService;

@@ -6,7 +6,7 @@ export default function TableHead({ columns = [] }) {
           <th
             key={index}
             className={`px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 ${
-              col === "Actions" ? "text-right" : "text-left"
+              col === "Action" ? "text-right" : "text-left"
             }`}
           >
             {col}

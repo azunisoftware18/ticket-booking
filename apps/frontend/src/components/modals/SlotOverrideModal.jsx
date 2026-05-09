@@ -50,15 +50,13 @@ export default function SlotOverrideModal({
         </div>
 
         {/* 4. Form Content Area */}
-        <div className="px-10 pb-10 pt-4">
-          <div className="rounded-4xl bg-slate-50/50 p-2 border border-slate-50">
-             <div className="bg-white rounded-[1.75rem] p-8 shadow-sm border border-slate-100/50">
+        <div className="px-10 pb-6 pt-4">
+          
+             
                 <SlotOverrideForm
                   onSubmit={onSubmit}
                   onCancel={onClose}
                 />
-             </div>
-          </div>
         </div>
       </div>
     </div>

@@ -3,7 +3,6 @@
 import { useForm } from "react-hook-form";
 import InputField from "@/components/ui/InputField";
 import Button from "@/components/ui/Button";
-import { useState } from "react";
 
 export default function SlotOverrideForm({ onSubmit }) {
   const {
@@ -32,15 +31,21 @@ export default function SlotOverrideForm({ onSubmit }) {
         {...register("date", { required: "Date required" })}
       />
 
-      {/* Start Time */}
+      {/* 🔥 Start Time (24-hour only) */}
       <InputField
         label="Start Time"
-        type="time"
+        placeholder="HH:mm (e.g. 14:00)"
         error={errors.startTime?.message}
-        {...register("startTime", { required: "Start time required" })}
+        {...register("startTime", {
+          required: "Start time required",
+          pattern: {
+            value: /^([01]\d|2[0-3]):([0-5]\d)$/,
+            message: "Use 24-hour format (HH:mm)",
+          },
+        })}
       />
 
-      {/* Capacity (optional) */}
+      {/* Capacity */}
       {!isClosed && (
         <InputField
           label="Override Capacity"
@@ -60,7 +65,7 @@ export default function SlotOverrideForm({ onSubmit }) {
         </label>
       </div>
 
-      {/* Buttons */}
+      {/* Button */}
       <div className="flex justify-end gap-3 pt-2">
         <Button
           type="submit"

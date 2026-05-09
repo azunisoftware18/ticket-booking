@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Plus, Search, Filter, CheckCircle2, AlertCircle } from "lucide-react";
+import { Plus, Search, Filter, CheckCircle2, AlertCircle, PlusIcon } from "lucide-react";
 import PlaceTable from "@/components/table/PlaceTable";
 import AddPlaceModal from "@/components/modals/AddPlaceModal";
 import { usePlaces } from "@/lib/queries/usePlace";
@@ -32,31 +32,36 @@ export default function PlacePage() {
 const handleFormSubmit = async (formData) => {
   try {
     const payload = {
-      name: formData.name,
-      location: formData.location,
+      name: formData.name.trim(), // Trim whitespace
+      location: formData.location.trim(),
       latitude: Number(formData.latitude),
       longitude: Number(formData.longitude),
       shortDescription: formData.shortDescription,
       description: formData.description,
     };
 
-    // 🔥 DUPLICATE CHECK
-    const isDuplicate = places?.some(
-      (p) =>
-        p.name === payload.name &&
-        p.location === payload.location &&
-        p.id !== editData?.id // ignore current item
-    );
+    // 🔥 ENHANCED DUPLICATE CHECK
+    const isDuplicate = places?.some((p) => {
+      // Name aur Location dono ko lowercase mein check karein taaki "Jaipur" aur "jaipur" same mane jayein
+      const nameMatch = p.name.toLowerCase() === payload.name.toLowerCase();
+      const locationMatch = p.location.toLowerCase() === payload.location.toLowerCase();
+      
+      // Agar Edit kar rahe hain to khud ko ignore karein
+      const isNotCurrentItem = p.id !== editData?.id;
+
+      return nameMatch && locationMatch && isNotCurrentItem;
+    });
 
     if (isDuplicate) {
       setAlert({
         show: true,
-        message: "Same name & location already exists",
+        message: `Oops! "${payload.name}" already exists in "${payload.location}".`,
         type: "error",
       });
-      return;
+      return; // Code yahan ruk jayega, aage create nahi hoga
     }
 
+    // Agar duplicate nahi hai, tabhi aage badhega
     if (editData) {
       await updatePlace({
         id: editData.id,
@@ -84,7 +89,7 @@ const handleFormSubmit = async (formData) => {
       type: "error",
     });
   }
-};  
+};
   const handleDelete = async (place) => {
     if (!confirm("Delete this place?")) return;
 
@@ -138,7 +143,7 @@ const handleFormSubmit = async (formData) => {
           <p className="text-slate-500 font-medium">Manage your locations</p>
         </div>
 
-        <Button onClick={() => setIsModalOpen(true)} text="Add New Place" />
+        <Button icon={PlusIcon} iconPosition="left" onClick={() => setIsModalOpen(true)} text="Add New Place" />
       </div>
 
       <div>

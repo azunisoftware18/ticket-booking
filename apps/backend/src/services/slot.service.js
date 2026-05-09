@@ -78,16 +78,48 @@ class SlotOverrideService {
       },
     });
   }
+  static async getAll(placeId, date) {
+    const start = new Date(`${date}T00:00:00.000Z`);
+
+    const end = new Date(`${date}T23:59:59.999Z`);
+
+    return prisma.slotOverride.findMany({
+      where: {
+        placeId,
+        date: {
+          gte: start,
+          lte: end,
+        },
+      },
+
+      orderBy: {
+        startTime: "asc",
+      },
+    });
+  }
 }
 
+const formatTime12Hour = (time) => {
+  const [hour, minute] = time.split(":");
+
+  const date = new Date();
+
+  date.setHours(hour);
+  date.setMinutes(minute);
+
+  return date.toLocaleTimeString("en-IN", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
 class SlotService {
   static async getSlotsByDate(placeId, date) {
     const templates = await prisma.slotTemplate.findMany({
       where: { placeId },
     });
 
-    console.log(placeId,date);
-    
+    console.log(placeId, date);
 
     const start = new Date(`${date}T00:00:00.000Z`);
     const end = new Date(`${date}T23:59:59.999Z`);
@@ -138,6 +170,7 @@ class SlotService {
 
       return {
         time: t.startTime,
+        displayTime: formatTime12Hour(t.startTime),
         capacity,
         booked,
         available,

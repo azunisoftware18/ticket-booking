@@ -6,12 +6,10 @@ export const useSlots = ({ placeId, date }) => {
   return useQuery({
     queryKey: ["slots", placeId, date],
     queryFn: async () => {
-      const res = await api.get(`/slot/slots`, {
-        params: { placeId, date },
-      });
+      const res = await api.get(`/slot/slots/${placeId}/${date}`);
       return res?.data?.data;
     },
-    enabled: !!placeId && !!date, // 🔥 important
+    enabled: !!placeId && !!date,
   });
 };
 
@@ -24,5 +22,24 @@ export const useSlotTemplates = (placeId) => {
       return res?.data?.data;
     },
     enabled: !!placeId,
+  });
+};
+
+export const useOverrides = ({
+  placeId,
+  date,
+}) => {
+  return useQuery({
+    queryKey: ["overrides", placeId, date],
+
+    queryFn: async () => {
+      const res = await api.get(
+        `/slot/override/${placeId}/${date}`
+      );
+
+      return res?.data?.data;
+    },
+
+    enabled: !!placeId && !!date,
   });
 };

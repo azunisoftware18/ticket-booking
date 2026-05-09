@@ -11,50 +11,46 @@ import {
 
 import ActionMenu from "@/components/common/ActionMenu";
 import { Pencil, Trash } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
-// ✅ Dummy Data (SlotTemplate based)
-const SLOT_TEMPLATES = [
-  {
-    id: "1",
-    startTime: "09:00 AM",
-    endTime: "10:00 AM",
-    capacity: 50,
-  },
-  {
-    id: "2",
-    startTime: "10:00 AM",
-    endTime: "11:00 AM",
-    capacity: 40,
-  },
-  {
-    id: "3",
-    startTime: "11:00 AM",
-    endTime: "12:00 PM",
-    capacity: 60,
-  },
-];
 
-export default function SlotTemplateTable() {
+export default function SlotTemplateTable({
+  data = [],
+  loading,
+  onEdit,
+  onDelete,
+}) {
   const [search, setSearch] = useState("");
-  const [loading] = useState(false);
 
-  // ✅ Filter logic
-  const filteredSlots = SLOT_TEMPLATES.filter((slot) =>
-    slot.startTime.toLowerCase().includes(search.toLowerCase()) ||
-    slot.endTime.toLowerCase().includes(search.toLowerCase())
-  );
+  // 🔥 optimized filter
+  const filteredSlots = useMemo(() => {
+    return data.filter((slot) =>
+      slot.startTime?.toLowerCase().includes(search.toLowerCase()) ||
+      slot.endTime?.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [data, search]);
 
-  const handleEdit = (slot) => console.log("Edit:", slot);
-  const handleDelete = (slot) => console.log("Delete:", slot);
+  const columns = ["Start Time", "End Time", "Capacity", "Action"];
+  const formatTime12Hour = (time) => {
 
-  const columns = ["Start Time", "End Time", "Capacity", "Actions"];
+  const [hour, minute] = time.split(":");
+
+  const date = new Date();
+
+  date.setHours(hour);
+  date.setMinutes(minute);
+
+  return date.toLocaleTimeString("en-IN", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
 
   return (
     <div className="p-6 bg-slate-50 min-h-screen">
-      
       <TableShell
-        title="Slot Templates "
+        title="Slot Templates"
         searchProps={{
           value: search,
           onChange: (e) => setSearch(e.target.value),
@@ -71,42 +67,40 @@ export default function SlotTemplateTable() {
             <TableEmpty message="No slots found" />
           ) : (
             filteredSlots.map((slot) => (
-              <TableRow key={slot.id}>
-                
+              <TableRow
+                key={slot.id}
+                renderActions={() => (
+                  <ActionMenu
+                    items={[
+                      {
+                        label: "Edit",
+                        icon: Pencil,
+                        onClick: () => onEdit?.(slot),
+                      },
+                      {
+                        label: "Delete",
+                        icon: Trash,
+                        danger: true,
+                        onClick: () => onDelete?.(slot),
+                      },
+                    ]}
+                  />
+                )}
+              >
                 {/* Start Time */}
                 <td className="px-5 py-3 font-medium text-gray-800">
-                  {slot.startTime}
+                  {formatTime12Hour(slot.startTime)}
                 </td>
 
                 {/* End Time */}
                 <td className="px-5 py-3 text-gray-600">
-                  {slot.endTime}
+                  {formatTime12Hour(slot.endTime)}
                 </td>
 
                 {/* Capacity */}
                 <td className="px-5 py-3 text-gray-500">
                   {slot.capacity}
                 </td>
-
-                {/* Actions */}
-                <td className="px-5 py-3 text-right w-20">
-                  <ActionMenu
-                    items={[
-                      {
-                        label: "Edit",
-                        icon: Pencil,
-                        onClick: () => handleEdit(slot),
-                      },
-                      {
-                        label: "Delete",
-                        icon: Trash,
-                        danger: true,
-                        onClick: () => handleDelete(slot),
-                      },
-                    ]}
-                  />
-                </td>
-
               </TableRow>
             ))
           )}

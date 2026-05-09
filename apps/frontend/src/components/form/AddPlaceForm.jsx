@@ -13,7 +13,14 @@ import Button from "../ui/Button";
 import InputField from "../ui/InputField";
 import { useEffect, useState } from "react";
 import TextareaField from "../ui/TextareaField";
+import dynamic from "next/dynamic";
 
+const MapPicker = dynamic(
+  () => import("@/components/common/MapPicker"),
+  {
+    ssr: false,
+  }
+);
 export default function AddPlaceForm({
   submitText = "Save Place",
   defaultValues = {},
@@ -75,7 +82,7 @@ export default function AddPlaceForm({
 }, [defaultValues, reset]);
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-white p-4">
+    <div className="w-full bg-white p-6">
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5">
 
         {/* Name + Location */}
@@ -117,6 +124,16 @@ export default function AddPlaceForm({
             })}
           />
         </div>
+        <div className="space-y-2">
+  <label className="text-sm font-semibold text-slate-700">
+    Select Location on Map
+  </label>
+
+  <MapPicker
+    setLatitude={(lat) => setValue("latitude", lat)}
+    setLongitude={(lng) => setValue("longitude", lng)}
+  />
+</div>
 
         {/* Short Description */}
         <TextareaField

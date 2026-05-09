@@ -32,8 +32,7 @@ export default function Header() {
               </span>
             </div>
           </div>
-
-          {/* RIGHT: Language & Action Button */}
+{/* RIGHT: Language & Action Button */}
           <div className="flex items-center gap-4">
             <div className="hidden lg:block">
               {/* Yellow Button like screenshot */}

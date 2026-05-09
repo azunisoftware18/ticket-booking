@@ -9,7 +9,6 @@ const router = Router();
 
 router.post(
   "/",
-  AuthMiddleware.isAuthenticated,
   ValidateRequest.validate(BookingValidation.createBooking),
   asyncHandler(BookingController.create)
 );
@@ -29,6 +28,18 @@ router.post(
   "/cancel/:id",
   AuthMiddleware.isAuthenticated,
   asyncHandler(BookingController.cancelBooking)
+);
+
+router.get(
+  "/all",
+  AuthMiddleware.isAuthenticated,
+  AuthMiddleware.authorize(["ADMIN"]),
+  asyncHandler(BookingController.getAll)
+);
+
+router.get(
+  "/:id",
+  asyncHandler(BookingController.getById)
 );
 
 export default router;

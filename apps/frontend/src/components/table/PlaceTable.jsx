@@ -39,7 +39,7 @@ export default function PlaceTable({
     "Latitude",
     "Longitude",
     "Created At",
-    "Actions",
+    "Action",
   ];
 
   return (

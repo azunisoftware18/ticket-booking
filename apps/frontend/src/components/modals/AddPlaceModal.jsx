@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { X, MapPin } from "lucide-react";
 import AddPlaceForm from "../form/AddPlaceForm";
 
@@ -12,41 +13,64 @@ export default function AddPlaceModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-9999 flex items-center justify-center p-4">
-      {/* Background Overlay with heavy blur */}
+    <div className="fixed inset-0 z-1000 flex items-center justify-center p-4">
+      {/* Background Overlay - Wapis standard neutral background */}
       <div
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-md transition-opacity"
+        className="absolute inset-0 bg-black/20 backdrop-blur-sm transition-opacity duration-300"
         onClick={onClose}
       />
 
-      {/* Modal Card - Redesigned Corners & Shadow */}
-      <div className="relative bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] w-full max-w-xl overflow-hidden animate-in fade-in zoom-in duration-300">
-        
-        {/* Header - Modern Gradient & Soft Borders */}
-        <div className="bg-linear-to-r from-sky-500 to-sky-600 px-10 py-8 text-white relative">
+      {/* Modal Card */}
+      <div
+        style={{
+          backgroundColor: "hsl(var(--card))",
+          borderColor: "hsl(var(--border))",
+        }}
+        className="
+relative
+w-full
+max-w-3xl
+max-h-[90vh]
+overflow-hidden
+rounded-[2.5rem]
+shadow-2xl
+z-10
+bg-white
+animate-in fade-in zoom-in-95 duration-200
+flex flex-col
+"
+      >
+        {/* HEADER - Sirf yahan color #ec003f apply kiya hai */}
+        <div
+          style={{ backgroundColor: "black" }}
+          className="px-8 py-9 text-white relative"
+        >
           <div className="flex items-center gap-4">
-            <div className="bg-white/20 backdrop-blur-lg p-3 rounded-2xl shadow-inner">
-              <MapPin size={28} className="text-white" />
+            <div className="bg-white/20 backdrop-blur-md p-3 rounded-2xl border border-white/10 shadow-inner">
+              <MapPin size={24} className="text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold tracking-tight">
+              <h2 className="text-2xl font-bold tracking-tight text-white">
                 {defaultValues?.id ? "Edit Destination" : "New Destination"}
               </h2>
-              <p className="text-sky-100/80 text-sm">Create a memorable spot</p>
+              <p className="text-white/80 text-sm">Create a memorable spot</p>
             </div>
           </div>
 
-          {/* Elegant Close Button */}
+          {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 p-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl transition-all group"
+            className="absolute top-6 right-6 p-2 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl transition-all group"
           >
-            <X size={20} className="group-hover:rotate-90 transition-transform duration-200" />
+            <X
+              size={18}
+              className="text-white group-hover:rotate-90 transition-transform duration-200"
+            />
           </button>
         </div>
 
-        {/* Content Area - Spacious Padding */}
-        <div className="p-10">
+        {/* Content Area - No changes here */}
+        <div className="flex-1 overflow-y-auto">
           <AddPlaceForm
             onSubmit={onSubmit}
             defaultValues={defaultValues}

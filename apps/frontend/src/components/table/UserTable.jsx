@@ -50,7 +50,7 @@ export default function UserTable() {
   const handleEdit = (user) => console.log("Edit:", user);
   const handleDelete = (user) => console.log("Delete:", user);
 
-  const columns = ["Name", "Email", "Role", "Created At", "Actions"];
+  const columns = ["Name", "Email", "Role", "Created At", "Action"];
 
   return (
     <div className="p-6 bg-slate-50 min-h-screen">

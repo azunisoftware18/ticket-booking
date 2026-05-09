@@ -12,6 +12,7 @@ import {
   X,
   Star,
   Calendar,
+  TicketIcon,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -21,6 +22,9 @@ const menuItems = [
   { icon: Home, label: "Dashboard", href: "/dashboard" },
   { icon: Map, label: "Place", href: "/dashboard/place" },
   { icon: Calendar, label: "Slots", href: "/dashboard/slots" },
+  { icon: Calendar, label: "Ticket Type", href: "/dashboard/ticket" },
+  { icon: Calendar, label: "Addon", href: "/dashboard/addon" },
+  { icon: TicketIcon, label: "Booking", href: "/dashboard/booking" },
 ];
 
 export default function Sidebar() {
@@ -164,14 +168,14 @@ export default function Sidebar() {
             <button
               onClick={() => {
                 logoutUser(undefined, {
-  onSuccess: () => {
-    // 🔥 React Query cache clear
-    queryClient.clear();
+                  onSuccess: () => {
+                    // 🔥 React Query cache clear
+                    queryClient.clear();
 
-    // 🔥 Hard reload (important)
-    window.location.href = "/login";
-  },
-});
+                    // 🔥 Hard reload (important)
+                    window.location.href = "/login";
+                  },
+                });
               }}
               className="flex items-center gap-4 w-full px-4 py-4 rounded-xl text-destructive hover:bg-(--destructive)/10 transition-colors duration-200 group"
             >

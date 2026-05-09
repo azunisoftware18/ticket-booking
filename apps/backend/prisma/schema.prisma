@@ -82,36 +82,6 @@ model SlotOverride {
   @@map("slot_overrides")
 }
 
-model Booking {
-  id String @id @default(uuid())
-
-  userId String?
-
-  placeId      String
-  slotDateTime DateTime
-
-  // CUSTOMER DETAILS
-  name  String
-  email String
-  phone String
-
-  totalAmount Float
-  status      String @default("PENDING") // PENDING, PAID, FAILED
-
-  txnId     String? @map("txn_id") // system txn id
-  paymentId String? @map("payment_id") // provider txn id
-
-  createdAt DateTime @default(now())
-
-  user  User? @relation(fields: [userId], references: [id])
-  place Place @relation(fields: [placeId], references: [id])
-
-  tickets Ticket[]
-
-  @@index([placeId, status, txnId])
-  @@map("bookings")
-}
-
 // TICKET TYPES
 model TicketType {
   id      String @id @default(uuid())
@@ -132,8 +102,6 @@ model TicketType {
   @@map("ticket_types")
 }
 
-<<<<<<< HEAD
-=======
 model Addon {
   id String @id @default(uuid())
 
@@ -147,25 +115,12 @@ model Addon {
 
   createdAt DateTime @default(now()) @map("created_at")
 
-  bookings BookingAddon[]
 
   @@unique([name, placeId])
   @@map("addons")
 }
 
-model BookingAddon {
-  id String @id @default(uuid())
 
-  bookingId String @map("booking_id")
-  addonId   String @map("addon_id")
-
-  quantity Int @default(1)
-
-  booking Booking @relation(fields: [bookingId], references: [id])
-  addon   Addon   @relation(fields: [addonId], references: [id])
-
-  @@map("booking_addons")
-}
 
 model Booking {
   id String @id @default(uuid())
@@ -181,23 +136,27 @@ model Booking {
   phone String
 
   totalAmount Float @map("total_amount")
-  totalSeats  Int   @map("total_seats") // ✅ ADD THIS
+  totalSeats  Int   @map("total_seats")
 
   status    String    @default("PENDING")
   expiresAt DateTime? @map("expires_at")
 
-  txnId     String? @unique @map("txn_id") // ✅ IMPORTANT UNIQUE
+  txnId     String? @unique @map("txn_id")
   paymentId String? @map("payment_id")
+
+  ticketPayload Json? @map("ticket_payload")
+
+  addonIds Json? @map("addon_ids")
 
   createdAt DateTime @default(now()) @map("created_at")
 
   tickets       Ticket[]
-  user          User?          @relation(fields: [userId], references: [id])
-  place         Place          @relation(fields: [placeId], references: [id])
-  bookingAddons BookingAddon[]
+  user          User? @relation(fields: [userId], references: [id])
+  place         Place @relation(fields: [placeId], references: [id])
+
+  @@map("bookings")
 }
 
->>>>>>> feadf336777fe8567afda08ac6b6318597cdef5d
 // TICKET
 model Ticket {
   id String @id @default(uuid())
@@ -211,7 +170,7 @@ model Ticket {
 
   qrCode String @unique @map("qr_code")
 
-  status TicketFlowStatus @default(PENDING)
+  status String @default("PENDING") // PENDING, SCANNED, EXPIRED
 
   booking Booking    @relation(fields: [bookingId], references: [id])
   type    TicketType @relation(fields: [typeId], references: [id])

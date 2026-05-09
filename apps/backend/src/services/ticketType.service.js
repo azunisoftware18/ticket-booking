@@ -33,9 +33,16 @@ class TicketTypeService {
           if (!data.placeId) throw ApiError.badRequest("placeId required");
 
           return await prisma.ticketType.findMany({
-            where: { placeId: data.placeId },
-            orderBy: { createdAt: "desc" },
-          });
+  where: { placeId: data.placeId },
+
+  include: {
+    place: true,
+  },
+
+  orderBy: {
+    createdAt: "desc",
+  },
+});
 
         case "upsert":
           const { name, placeId, price, maxPerBooking } = data;

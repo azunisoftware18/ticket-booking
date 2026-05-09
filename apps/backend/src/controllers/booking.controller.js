@@ -11,13 +11,29 @@ class BookingController {
   static success = async (req, res) => {
     const data = await BookingService.paymentSuccess(req.body);
 
-    return res.send("Payment Success ✅");
+    return res.redirect(
+      `http://localhost:3000/payment-success?bookingId=${data.id}`
+    );
   };
 
   static failure = async (req, res) => {
     await BookingService.paymentFailure(req.body);
 
     return res.send("Payment Failed ❌");
+  };
+
+  static getAll = async (req, res) => {
+    const data = await BookingService.getAllBookings();
+
+    return res.json(ApiResponse.success(data, "Bookings fetched"));
+  };
+
+  static getById = async (req, res) => {
+    const { id } = req.params;
+
+    const data = await BookingService.getBookingById(id);
+
+    return res.json(ApiResponse.success(data, "Booking fetched"));
   };
 
   static async cancelBooking(req, res) {

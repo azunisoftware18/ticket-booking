@@ -49,4 +49,9 @@ router.post(
 
 router.get("/slots/:placeId/:date", asyncHandler(SlotController.getByDate));
 
+router.get(
+  "/override/:placeId/:date",
+  asyncHandler(SlotOverrideController.getAll)
+);
+
 export default router;

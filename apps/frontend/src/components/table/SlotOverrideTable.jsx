@@ -11,53 +11,31 @@ import {
 
 import ActionMenu from "@/components/common/ActionMenu";
 import { Pencil, Trash } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
-// ✅ Dummy Data
-const SLOT_OVERRIDES = [
-  {
-    id: "1",
-    date: "2026-04-10",
-    startTime: "09:00 AM",
-    capacity: 20,
-    isClosed: false,
-  },
-  {
-    id: "2",
-    date: "2026-04-10",
-    startTime: "10:00 AM",
-    capacity: null,
-    isClosed: true,
-  },
-  {
-    id: "3",
-    date: "2026-04-11",
-    startTime: "11:00 AM",
-    capacity: 30,
-    isClosed: false,
-  },
-];
-
-export default function SlotOverrideTable() {
+export default function SlotOverrideTable({
+  data = [],
+  loading,
+  onEdit,
+  onDelete,
+}) {
   const [search, setSearch] = useState("");
-  const [loading] = useState(false);
 
-  // ✅ Filter
-  const filteredData = SLOT_OVERRIDES.filter((item) =>
-    item.startTime.toLowerCase().includes(search.toLowerCase()) ||
-    item.date.includes(search)
-  );
+  // 🔥 optimize filtering
+  const filteredData = useMemo(() => {
+    return data.filter((item) =>
+      item.startTime?.toLowerCase().includes(search.toLowerCase()) ||
+      item.date?.includes(search)
+    );
+  }, [data, search]);
 
-  const handleEdit = (row) => console.log("Edit:", row);
-  const handleDelete = (row) => console.log("Delete:", row);
-
-  const columns = ["Date", "Start Time", "Capacity", "Status", "Actions"];
+  const columns = ["Date", "Start Time", "Capacity", "Status", "Action"];
+  
 
   return (
     <div className="p-6 bg-slate-50 min-h-screen">
-      
       <TableShell
-        title="Slot Overrides "
+        title="Slot Overrides"
         searchProps={{
           value: search,
           onChange: (e) => setSearch(e.target.value),
@@ -74,8 +52,26 @@ export default function SlotOverrideTable() {
             <TableEmpty message="No overrides found" />
           ) : (
             filteredData.map((item) => (
-              <TableRow key={item.id}>
-                
+              <TableRow
+                key={item.id}
+                renderActions={() => (
+                  <ActionMenu
+                    items={[
+                      {
+                        label: "Edit",
+                        icon: Pencil,
+                        onClick: () => onEdit?.(item),
+                      },
+                      {
+                        label: "Delete",
+                        icon: Trash,
+                        danger: true,
+                        onClick: () => onDelete?.(item),
+                      },
+                    ]}
+                  />
+                )}
+              >
                 {/* Date */}
                 <td className="px-5 py-3 font-medium text-gray-800">
                   {new Date(item.date).toLocaleDateString()}
@@ -103,26 +99,6 @@ export default function SlotOverrideTable() {
                     </span>
                   )}
                 </td>
-
-                {/* Actions */}
-                <td className="px-5 py-3 text-right w-20">
-                  <ActionMenu
-                    items={[
-                      {
-                        label: "Edit",
-                        icon: Pencil,
-                        onClick: () => handleEdit(item),
-                      },
-                      {
-                        label: "Delete",
-                        icon: Trash,
-                        danger: true,
-                        onClick: () => handleDelete(item),
-                      },
-                    ]}
-                  />
-                </td>
-
               </TableRow>
             ))
           )}

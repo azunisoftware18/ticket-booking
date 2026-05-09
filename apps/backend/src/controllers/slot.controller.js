@@ -31,6 +31,17 @@ class SlotOverrideController {
     const data = await SlotOverrideService.upsert(req.body);
     res.success(data, "Override saved");
   };
+  static getAll = async (req, res) => {
+
+  const { placeId, date } = req.params;
+
+  const data = await SlotOverrideService.getAll(
+    placeId,
+    date
+  );
+
+  res.success(data);
+};
 }
 
 class SlotController {

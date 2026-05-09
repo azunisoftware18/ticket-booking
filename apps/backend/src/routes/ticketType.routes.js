@@ -11,4 +11,9 @@ router.post(
   asyncHandler(TicketTypeController.handle)
 );
 
+router.post(
+  "/public",
+  asyncHandler(TicketTypeController.handle)
+);
+
 export default router;
