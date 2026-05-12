@@ -42,29 +42,29 @@ flex flex-col
       >
         {/* HEADER - Sirf yahan color #ec003f apply kiya hai */}
         <div
-          style={{ backgroundColor: "black" }}
-          className="px-8 py-9 text-white relative"
+          style={{ backgroundColor: "white" }}
+          className="px-8 py-9 text-black relative"
         >
           <div className="flex items-center gap-4">
             <div className="bg-white/20 backdrop-blur-md p-3 rounded-2xl border border-white/10 shadow-inner">
-              <MapPin size={24} className="text-white" />
+              <MapPin size={24} className="text-black" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold tracking-tight text-white">
+              <h2 className="text-2xl font-bold tracking-tight text-black">
                 {defaultValues?.id ? "Edit Destination" : "New Destination"}
               </h2>
-              <p className="text-white/80 text-sm">Create a memorable spot</p>
+              <p className="text-black/80 text-sm">Create a memorable spot</p>
             </div>
           </div>
 
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 p-2 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl transition-all group"
+            className="absolute top-6 right-6 p-2 bg-white/10 hover:bg-black/20 border border-white/10 rounded-xl transition-all group"
           >
             <X
               size={18}
-              className="text-white group-hover:rotate-90 transition-transform duration-200"
+              className="text-black group-hover:rotate-90 transition-transform duration-200"
             />
           </button>
         </div>

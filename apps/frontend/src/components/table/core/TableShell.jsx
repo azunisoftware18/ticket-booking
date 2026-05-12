@@ -11,7 +11,6 @@ export default function TableShell({
 }) {
   return (
     <div className="w-full bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-      
       {/* Header */}
       {(title || searchProps) && (
         <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-5 border-b border-slate-100 gap-4">
@@ -31,7 +30,7 @@ export default function TableShell({
 
       {/* Table Content */}
       <div className="overflow-x-auto">
-        <table className="w-full text-sm text-left border-collapse">
+        <table className="w-full table-fixed text-sm text-left border-collapse">
           {children}
         </table>
       </div>

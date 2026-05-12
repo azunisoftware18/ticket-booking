@@ -9,7 +9,7 @@ export default function PaymentSuccessPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const bookingId = searchParams.get("bookingId");
+  const bookingId = searchParams.get("bookingId")?.trim();
 
   // 🔥 GET BOOKING DATA
   const { data: booking, isLoading } = useBookingById(bookingId);
@@ -69,28 +69,37 @@ export default function PaymentSuccessPage() {
               {/* Visit Date */}
               <Row
                 label="Visit Date"
-                value={new Date(
-                  booking?.slotDateTime
-                ).toLocaleDateString("en-IN", {
-                  weekday: "long",
-                  day: "2-digit",
-                  month: "long",
-                  year: "numeric",
-                })}
+                value={
+  booking?.slotDateTime
+    ? new Date(booking.slotDateTime).toLocaleDateString(
+        "en-IN",
+        {
+          weekday: "long",
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+        }
+      )
+    : "-"
+}
               />
 
               {/* Time */}
-              <Row
+             <Row
   label="Time Slot"
-  value={new Date(
-    `1970-01-01T${booking?.slotDateTime
-      ?.split("T")[1]
-      ?.slice(0, 5)}`
-  ).toLocaleTimeString("en-IN", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  })}
+  value={
+    booking?.slotDateTime
+      ? new Date(
+          `1970-01-01T${booking.slotDateTime
+            .split("T")[1]
+            .slice(0, 5)}`
+        ).toLocaleTimeString("en-IN", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        })
+      : "-"
+  }
 />
 
               {/* Visitors */}

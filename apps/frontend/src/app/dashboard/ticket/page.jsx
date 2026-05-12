@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Info } from "lucide-react";
+import { Info, Plus } from "lucide-react";
 
 import TicketTypeTable from "@/components/table/TicketTypeTable";
 import TicketTypeModal from "@/components/modals/TicketTypeModal";
@@ -152,6 +152,8 @@ export default function TicketTypePage() {
         </div>
 
         <Button
+        icon={Plus}
+        iconPosition="left"
           onClick={() => {
             setEditData(null);
             setIsModalOpen(true);

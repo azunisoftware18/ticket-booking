@@ -203,7 +203,7 @@ model ScanLog {
   id String @id @default(uuid())
 
   ticketId String   @map("ticket_id")
-  gateId   String   @map("gate_id")
+  gateId   String?   @map("gate_id")
   type     GateType
 
   scannedAt DateTime @default(now()) @map("scanned_at")

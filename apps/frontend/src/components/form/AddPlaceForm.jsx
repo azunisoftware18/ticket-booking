@@ -8,6 +8,7 @@ import {
   X,
   ImageIcon,
   Globe,
+  Plus,
 } from "lucide-react";
 import Button from "../ui/Button";
 import InputField from "../ui/InputField";
@@ -171,6 +172,8 @@ export default function AddPlaceForm({
             onClick={onCancel || (() => reset())}
           />
           <Button
+          icon={Plus}
+            iconPosition="left"
             type="submit"
             text={isSubmitting ? "Saving..." : submitText}
           />

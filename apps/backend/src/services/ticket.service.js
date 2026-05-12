@@ -1,6 +1,7 @@
 import prisma from "../db/db.js";
 import PDFDocument from "pdfkit";
 import QRCode from "qrcode";
+import { ApiError } from "../utils/ApiError.js";
 
 class TicketService {
   static async getAllTickets() {
@@ -143,6 +144,62 @@ class TicketService {
 
     return pdfPromise;
   }
+  static async scanTicket(payload) {
+
+  const { qrCode } = payload;
+
+  const ticket = await prisma.ticket.findFirst({
+    where: {
+      qrCode,
+    },
+
+    include: {
+      booking: true,
+      type: true,
+      place: true,
+      user: true,
+    },
+  });
+
+  if (!ticket) {
+    throw ApiError.notFound("Invalid Ticket");
+  }
+
+  // already scanned
+  if (ticket.status === "SCANNED") {
+    throw ApiError.badRequest("Ticket already scanned");
+  }
+
+  // booking unpaid
+  if (ticket.booking.status !== "PAID") {
+    throw ApiError.badRequest("Payment not completed");
+  }
+
+  // update status
+  const updatedTicket = await prisma.ticket.update({
+    where: {
+      id: ticket.id,
+    },
+
+    data: {
+      status: "SCANNED",
+    },
+  });
+
+  // save logs
+  await prisma.scanLog.create({
+  data: {
+    ticketId: ticket.id,
+    type: "ENTRY",
+  },
+});
+
+  return {
+    ticket: updatedTicket,
+    booking: ticket.booking,
+    type: ticket.type,
+  };
+}
 }
 
 export default TicketService;

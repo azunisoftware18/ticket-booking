@@ -26,7 +26,7 @@ export default function SlotOverrideModal({
         <div className="px-10 pt-10 pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 shadow-inner">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white-50 text-black shadow-inner">
                 {defaultValues?.id ? <Settings2 size={28} /> : <CalendarClock size={28} />}
               </div>
               <div>

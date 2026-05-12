@@ -27,4 +27,20 @@ router.post(
   asyncHandler(AuthController.logout)
 );
 
+// 🔥 UPDATE PROFILE
+router.put(
+  "/profile",
+  AuthMiddleware.isAuthenticated,
+  ValidateRequest.validate(AuthValidation.updateProfile),
+  asyncHandler(AuthController.updateProfile)
+);
+
+// 🔥 UPDATE PASSWORD
+router.put(
+  "/password",
+  AuthMiddleware.isAuthenticated,
+  ValidateRequest.validate(AuthValidation.updatePassword),
+  asyncHandler(AuthController.updatePassword)
+);
+
 export default router;

@@ -48,6 +48,21 @@ class AuthController {
       .status(200)
       .json(ApiResponse.success(null, "Logged out successfully"));
   };
+  static updateProfile = async (req, res) => {
+    const data = await AuthService.updateProfile(req.user.id, req.body);
+
+    return res
+      .status(200)
+      .json(ApiResponse.success(data, "Profile updated successfully"));
+  };
+
+  static updatePassword = async (req, res) => {
+    await AuthService.updatePassword(req.user.id, req.body);
+
+    return res
+      .status(200)
+      .json(ApiResponse.success(null, "Password updated successfully"));
+  };
 }
 
 export default AuthController;

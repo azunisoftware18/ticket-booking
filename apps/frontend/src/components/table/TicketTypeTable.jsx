@@ -11,11 +11,10 @@ import {
 
 import ActionMenu from "../common/ActionMenu";
 import { Pencil, Trash, Eye } from "lucide-react";
-import { useState, useMemo } from "react";
-
+import { useState, useMemo, useEffect } from "react";
 
 export default function TicketTypeTable({
-  data = [], // 🔥 fallback to dummy
+  data = [],
   loading = false,
   onEdit,
   onDelete,
@@ -23,8 +22,9 @@ export default function TicketTypeTable({
 }) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const itemsPerPage = 10; // ✅ Ek page par kitne items dikhane hain
 
-  // 🔍 Search
+  // 🔍 Search Logic
   const filteredData = useMemo(() => {
     return data.filter((item) =>
       [item.name, item.place?.name].some((val) =>
@@ -32,6 +32,20 @@ export default function TicketTypeTable({
       )
     );
   }, [data, search]);
+
+  // ✅ Pagination Logic
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage) || 1;
+
+  // Current page ka data nikalne ke liye slice karein
+  const currentData = useMemo(() => {
+    const start = (page - 1) * itemsPerPage;
+    return filteredData.slice(start, start + itemsPerPage);
+  }, [filteredData, page]);
+
+  // Agar search karne par items kam ho jayein, toh page 1 par reset karein
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
 
   const columns = [
     "Ticket Name",
@@ -53,9 +67,9 @@ export default function TicketTypeTable({
       }}
       paginationProps={{
         page,
-        totalPages: 1,
-        onNext: () => setPage((p) => p + 1),
-        onPrev: () => setPage((p) => p - 1),
+        totalPages: totalPages,
+        onNext: () => setPage((p) => Math.min(p + 1, totalPages)),
+        onPrev: () => setPage((p) => Math.max(p - 1, 1)),
       }}
     >
       <TableHead columns={columns} />
@@ -63,10 +77,11 @@ export default function TicketTypeTable({
       <TableBody>
         {loading ? (
           <TableLoader rows={5} />
-        ) : filteredData.length === 0 ? (
+        ) : currentData.length === 0 ? (
           <TableEmpty colSpan={5} message="No ticket types found." />
         ) : (
-          filteredData.map((ticket) => (
+          /* ✅ filteredData ki jagah currentData map karein */
+          currentData.map((ticket) => (
             <TableRow
               key={ticket.id}
               renderActions={() => (
@@ -75,7 +90,7 @@ export default function TicketTypeTable({
                     {
                       label: "View",
                       icon: Eye,
-                      onClick: () => console.log("View", ticket),
+                      onClick: () => onView?.(ticket),
                     },
                     {
                       label: "Edit",
@@ -92,22 +107,18 @@ export default function TicketTypeTable({
                 />
               )}
             >
-              {/* Name */}
               <td className="px-6 py-4 font-semibold text-slate-900">
                 {ticket.name}
               </td>
 
-              {/* Place */}
               <td className="px-6 py-4 text-slate-600">
                 {ticket.place?.name || "N/A"}
               </td>
 
-              {/* Price */}
               <td className="px-6 py-4 font-medium text-slate-800">
                 ₹{ticket.price}
               </td>
 
-              {/* Max */}
               <td className="px-6 py-4 text-slate-500">
                 {ticket.maxPerBooking}
               </td>

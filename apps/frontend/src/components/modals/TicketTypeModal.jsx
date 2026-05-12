@@ -26,7 +26,7 @@ export default function TicketTypeModal({
         <div className="relative px-10 pt-10 pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-50 text-sky-600 shadow-inner border border-sky-100">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white-50 text-black shadow-inner border border-sky-100">
                 {defaultValues?.id ? <Sparkles size={28} /> : <Ticket size={28} />}
               </div>
               <div>

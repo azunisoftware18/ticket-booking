@@ -6,6 +6,7 @@ import placeRoute from "./place.routes.js";
 import ticketTypeRoute from "./ticketType.routes.js";
 import addonRoute from "./addon.routes.js";
 import ticketRoutes from "./ticket.routes.js";  
+import scanLogRoutes from "./scanLog.routes.js";
 
 const router = Router();
 
@@ -17,5 +18,6 @@ router.use("/slot", slotRoute);
 router.use("/ticket-type", ticketTypeRoute);
 router.use("/addon", addonRoute);
 router.use("/ticket", ticketRoutes);
+router.use("/scan-log", scanLogRoutes);
 
 export default router;

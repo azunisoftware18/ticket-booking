@@ -29,7 +29,7 @@ class BookingController {
   };
 
   static getById = async (req, res) => {
-    const { id } = req.params;
+    const id = req.params.id.trim();
 
     const data = await BookingService.getBookingById(id);
 

@@ -350,37 +350,43 @@ class BookingService {
     });
   }
   static async getBookingById(id) {
-
-  const booking = await prisma.booking.findUnique({
-    where: {
-      id,
-    },
-
-    include: {
-      place: true,
-
-      user: true,
-
-      tickets: {
-        include: {
-          type: true,
-        },
+    const booking = await prisma.booking.findUnique({
+      where: {
+        id,
       },
 
-      bookingAddons: {
-        include: {
-          addon: true,
+      include: {
+        place: true,
+        user: true,
+        tickets: {
+          include: {
+            type: true,
+          },
         },
       },
-    },
-  });
+    });
 
-  if (!booking) {
-    throw ApiError.notFound("Booking not found");
+    if (!booking) {
+      throw ApiError.notFound("Booking not found");
+    }
+
+    const addonIds = Array.isArray(booking.addonIds) ? booking.addonIds : [];
+
+    if (addonIds.length) {
+      const addons = await prisma.addon.findMany({
+        where: {
+          id: { in: addonIds },
+        },
+      });
+
+      return {
+        ...booking,
+        addons,
+      };
+    }
+
+    return booking;
   }
-
-  return booking;
-}
 }
 
 export default BookingService;

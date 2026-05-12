@@ -5,8 +5,10 @@ export default function TableHead({ columns = [] }) {
         {columns.map((col, index) => (
           <th
             key={index}
-            className={`px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 ${
-              col === "Action" ? "text-right" : "text-left"
+            className={`px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 w-1/3 ${
+              col === "Action"
+                ? "text-right"
+                : "text-left"
             }`}
           >
             {col}

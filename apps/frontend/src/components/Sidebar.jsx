@@ -13,6 +13,10 @@ import {
   Star,
   Calendar,
   TicketIcon,
+  Camera,
+  MapPlus,
+  BookCheck,
+  Scan,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -22,9 +26,10 @@ const menuItems = [
   { icon: Home, label: "Dashboard", href: "/dashboard" },
   { icon: Map, label: "Place", href: "/dashboard/place" },
   { icon: Calendar, label: "Slots", href: "/dashboard/slots" },
-  { icon: Calendar, label: "Ticket Type", href: "/dashboard/ticket" },
-  { icon: Calendar, label: "Addon", href: "/dashboard/addon" },
-  { icon: TicketIcon, label: "Booking", href: "/dashboard/booking" },
+  { icon: TicketIcon, label: "Ticket Type", href: "/dashboard/ticket" },
+  { icon: MapPlus, label: "Addon", href: "/dashboard/addon" },
+  { icon: BookCheck, label: "Booking", href: "/dashboard/booking" },
+  { icon: Scan, label: "Ticket Scanner", href: "/dashboard/ticket-scanner" },
 ];
 
 export default function Sidebar() {

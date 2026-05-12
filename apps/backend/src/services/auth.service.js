@@ -100,6 +100,70 @@ class AuthService {
 
     return true;
   }
+  // 🔥 UPDATE PROFILE
+static async updateProfile(userId, payload) {
+
+  const updatedUser = await prisma.user.update({
+    where: {
+      id: userId,
+    },
+
+    data: {
+      fullName: payload.fullName,
+      email: payload.email,
+      phone: payload.phone,
+    },
+
+    select: {
+      id: true,
+      fullName: true,
+      email: true,
+      phone: true,
+      role: true,
+    },
+  });
+
+  return updatedUser;
+}
+
+// 🔥 UPDATE PASSWORD
+static async updatePassword(userId, payload) {
+
+  const { oldPassword, newPassword } = payload;
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+
+  if (!user) {
+    throw ApiError.notFound("User not found");
+  }
+
+  const isMatch = await bcrypt.compare(
+    oldPassword,
+    user.password
+  );
+
+  if (!isMatch) {
+    throw ApiError.badRequest("Old password incorrect");
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+  await prisma.user.update({
+    where: {
+      id: userId,
+    },
+
+    data: {
+      password: hashedPassword,
+    },
+  });
+
+  return true;
+}
 }
 
 export default AuthService;

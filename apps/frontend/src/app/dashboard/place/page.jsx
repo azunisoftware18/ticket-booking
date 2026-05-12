@@ -135,7 +135,7 @@ const handleFormSubmit = async (formData) => {
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+      <div className="w-full mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">
             Tourist Destinations
@@ -146,7 +146,7 @@ const handleFormSubmit = async (formData) => {
         <Button icon={PlusIcon} iconPosition="left" onClick={() => setIsModalOpen(true)} text="Add New Place" />
       </div>
 
-      <div>
+      <div className="w-full mx-auto bg-white border border-slate-200 rounded-xl shadow-sm">
         <PlaceTable
           data={places}
           loading={isLoading}

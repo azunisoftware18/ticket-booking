@@ -7,8 +7,7 @@ const router = Router();
 
 router.post(
   "/",
-  AuthMiddleware.isAuthenticated,
-  AuthMiddleware.authorize(["ADMIN"]),
+  
   asyncHandler(AddonController.handle)
 );
 

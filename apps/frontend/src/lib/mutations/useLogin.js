@@ -24,3 +24,41 @@ export const useLogin = () => {
     },
   });
 };
+
+export const useUpdateProfile = () => {
+
+  const dispatch = useDispatch();
+
+  return useMutation({
+    mutationFn: async (payload) => {
+
+      const { data } = await api.put(
+        "/auth/profile",
+        payload
+      );
+
+      return data;
+    },
+
+    onSuccess: (res) => {
+
+      dispatch(login(res.data));
+    },
+  });
+};
+
+// 🔥 UPDATE PASSWORD
+export const useUpdatePassword = () => {
+
+  return useMutation({
+    mutationFn: async (payload) => {
+
+      const { data } = await api.put(
+        "/auth/password",
+        payload
+      );
+
+      return data;
+    },
+  });
+};
