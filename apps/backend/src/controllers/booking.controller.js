@@ -19,7 +19,7 @@ class BookingController {
   static failure = async (req, res) => {
     await BookingService.paymentFailure(req.body);
 
-    return res.send("Payment Failed ❌");
+    return res.redirect("http://localhost:3000/payment-failure");
   };
 
   static getAll = async (req, res) => {

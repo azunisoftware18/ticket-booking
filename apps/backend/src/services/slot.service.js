@@ -134,15 +134,22 @@ class SlotService {
       },
     });
 
-    const bookings = await prisma.ticket.groupBy({
-      by: ["slotDateTime"],
-      _count: true,
+    const bookings = await prisma.ticket.findMany({
       where: {
         placeId,
-        slotDateTime: {
-          gte: new Date(`${date}T00:00:00`),
-          lt: new Date(`${date}T23:59:59`),
+
+        status: {
+          not: "CANCELLED",
         },
+
+        slotDateTime: {
+          gte: new Date(`${date}T00:00:00.000Z`),
+          lt: new Date(`${date}T23:59:59.999Z`),
+        },
+      },
+
+      select: {
+        slotDateTime: true,
       },
     });
 
@@ -155,10 +162,13 @@ class SlotService {
 
       const slotDateTime = new Date(`${date}T${t.startTime}:00`);
 
-      const booked =
-        bookings.find(
-          (b) => new Date(b.slotDateTime).getTime() === slotDateTime.getTime()
-        )?._count || 0;
+      const booked = bookings.filter((b) => {
+        const bookingHour = new Date(b.slotDateTime).getUTCHours();
+
+        const slotHour = Number(t.startTime.split(":")[0]);
+
+        return bookingHour === slotHour;
+      }).length;
 
       const available = Math.max(capacity - booked, 0);
 
