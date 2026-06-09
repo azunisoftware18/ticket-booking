@@ -12,14 +12,14 @@ class BookingController {
     const data = await BookingService.paymentSuccess(req.body);
 
     return res.redirect(
-      `http://localhost:3000/payment-success?bookingId=${data.id}`
+      `${process.env.FRONTEND_URL}/payment-success?bookingId=${data.id}`
     );
   };
 
   static failure = async (req, res) => {
     await BookingService.paymentFailure(req.body);
 
-    return res.redirect("http://localhost:3000/payment-failure");
+    return res.redirect(`${process.env.FRONTEND_URL}/payment-failure`);
   };
 
   static getAll = async (req, res) => {

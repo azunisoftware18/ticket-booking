@@ -127,3 +127,95 @@
     @apply font-sans;
     }
 }
+
+@theme {
+  --color-jaipur-pink: #E38B8D;
+  --color-jaipur-dark: #B3541E;
+  --color-royal-blue: #0b2149;
+  --color-sandstone: #FFF9F1;
+  --color-gold: #D4AF37;
+  
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+html {
+  overflow-x: hidden;
+  scroll-behavior: auto;
+}
+
+body {
+  background-color: var(--color-sandstone);
+  color: #1d1d1d;
+  font-family: serif;
+  overflow-x: hidden;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+
+
+  
+.bg-mandala {
+  background-image: url('https://www.transparenttextures.com/patterns/mandala-light.png');
+  background-repeat: repeat;
+}
+
+section {
+  position: relative;
+}
+
+img {
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+::selection {
+  background: #D4AF37;
+  color: white;
+}
+
+/* Luxury Card Hover Animations */
+.hover-luxury {
+  transition: all 0.6s ease;
+}
+
+.hover-luxury:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+}
+
+
+
+
+@keyframes floatUpDown {
+  0% { transform: translateY(0px) rotate(-8deg); }
+  50% { transform: translateY(-10px) rotate(-16deg); }
+  100% { transform: translateY(0px) rotate(-8deg); }
+}
+
+@keyframes floatUpDown2 {
+  0% { transform: translateY(0px) rotate(6deg); }
+  50% { transform: translateY(-10px) rotate(6deg); }
+  100% { transform: translateY(0px) rotate(6deg); }
+}
+
+.floatUpDown {
+  animation: floatUpDown 3s ease-in-out infinite;
+}
+
+.floatUpDown2 {
+  animation: floatUpDown 3s ease-in-out infinite;
+  rotate: 30deg;
+}

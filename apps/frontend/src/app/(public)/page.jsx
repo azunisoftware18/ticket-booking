@@ -1,151 +1,246 @@
 "use client";
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, MapPin } from 'lucide-react';
-import DecayCard from '@/components/DecayCard';
 
-// --- CONFIGURATION ---
-const IMAGES = {
-  HAWA_MAHAL: '/hawa_mahal.jpg',
-  PATTERN_TEAL: '/pattern_teal.jpg',
-  PATTERN_RED: '/pattern_red.jpg',
-  PATTERN_GOLD: '/pattern_gold.jpg',
-  PATTERN_PURPLE: '/pattern_purple.jpg',
-  SHUTTER_LAYER_BG: '/main_shutter_bg.jpg',
-  MAIN_BG: '/hawa_mahal.jpg' 
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import BookNowBtn from "@/components/ui/BookNowBtn";
+import Banners from "@/components/common/home/Banners";
+import Link from "next/link";
+import Image from "next/image";
+import { usePlaces } from "@/hooks/usePlace";
+// import PlacesSlider from "@/components/Home/PlacesSlider";
+import GuidBanner from "@/components/common/home/GuidBanner";
+import { ChevronsUp } from "lucide-react";
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
 };
 
-// --- CARDS DATA ---
-const CARD_DATA = [
-  { id: 1, title: "Royal Jaipur", img: "https://picsum.photos/400/600?random=1" },
-  { id: 2, title: "Heritage Walk", img: "https://picsum.photos/400/600?random=2" },
-  { id: 3, title: "Desert Safari", img: "https://picsum.photos/400/600?random=3" },
-  { id: 4, title: "Local Craft", img: "https://picsum.photos/400/600?random=4" },
-];
+const cascadeContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.15, delayChildren: 0.1 }
+  }
+};
 
-const MOSAIC_PANELS = [
-  { x: 0, y: 0, w: 32, h: 22, img: IMAGES.PATTERN_GOLD, radius: '0 0 80px 0', shiftX: -100, shiftY: -100, delay: 0.1 },
-  { x: 65, y: 0, w: 35, h: 30, img: IMAGES.PATTERN_TEAL, radius: '0 0 0 100px', shiftX: 100, shiftY: -100, delay: 0.2 },
-  { x: 15, y: 12, w: 70, h: 35, img: IMAGES.HAWA_MAHAL, radius: '100px 100px 0 0', shiftX: 0, shiftY: -120, delay: 0, zIndex: 10 },
-  { x: 0, y: 25, w: 25, h: 35, img: IMAGES.PATTERN_RED, radius: '0 50px 50px 0', shiftX: -120, shiftY: 0, delay: 0.3 },
-  { x: 30, y: 35, w: 40, h: 55, img: IMAGES.HAWA_MAHAL, radius: '100px', shiftX: 0, shiftY: 120, delay: 0.05, zIndex: 11 },
-  { x: 78, y: 35, w: 22, h: 40, img: IMAGES.PATTERN_PURPLE, radius: '40px 0 0 40px', shiftX: 120, shiftY: 0, delay: 0.15 },
-  { x: 0, y: 65, w: 30, h: 35, img: IMAGES.PATTERN_RED, radius: '0 80px 0 0', shiftX: -100, shiftY: 100, delay: 0.4 },
-  { x: 55, y: 70, w: 45, h: 40, img: IMAGES.PATTERN_TEAL, radius: '120px 0 0 0', shiftX: 100, shiftY: 100, delay: 0.3 },
-  { x: 25, y: 85, w: 40, h: 15, img: IMAGES.PATTERN_PURPLE, radius: '50px 50px 0 0', shiftX: 0, shiftY: 150, delay: 0.5 },
-];
-
-const SHUTTER_SPEED = 1.8;
-
-const JaipurMosaicShutter = () => {
-  const [isAppReady, setIsAppReady] = useState(false);
+export default function Home() {
+  const { data: places = [] } = usePlaces();
+  const placeId = places?.[0]?._id || places?.[0]?.id;
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsAppReady(true), 2500);
-    return () => clearTimeout(timer);
+    const toggleVisibility = () => {
+      if (window.scrollY > 300) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+    };
+    window.addEventListener("scroll", toggleVisibility);
+    return () => window.removeEventListener("scroll", toggleVisibility);
   }, []);
 
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   return (
-    <div className="relative min-h-screen w-full bg-[#03281e] overflow-x-hidden overflow-y-auto">
+    <>
       <AnimatePresence>
-        {!isAppReady && (
-          <motion.div 
-            key="shutter-container"
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.8 }}
-            style={{ backgroundImage: `url(${IMAGES.SHUTTER_LAYER_BG})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-            className="fixed inset-0 z-50 overflow-hidden"
+        {isVisible && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            onClick={scrollToTop}
+            className="fixed bottom-8 right-8 z-50 p-3 rounded-full group cursor-pointer bg-gradient-to-r from-jaipur-dark to-[#994113] text-white border-none hover:from-jaipur-dark hover:to-[#b24d18] hover:scale-[1.02] active:scale-[0.98] shadow-[0_10px_25px_rgba(153,65,19,0.3)] transition-all duration-300"
           >
-            <div className="absolute inset-0 bg-black/10 pointer-events-none" />
-            <div className="relative w-full h-full">
-              {MOSAIC_PANELS.map((panel, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ x: 0, y: 0, opacity: 1 }}
-                  exit={{ 
-                    x: `${panel.shiftX}%`, 
-                    y: `${panel.shiftY}%`, 
-                    opacity: 0,
-                    transition: { duration: SHUTTER_SPEED, delay: panel.delay, ease: [0.4, 0, 0.2, 1] } 
-                  }}
-                  style={{
-                    position: 'absolute', left: `${panel.x}%`, top: `${panel.y}%`, width: `${panel.w}%`, height: `${panel.h}%`,
-                    backgroundImage: `url(${panel.img})`, backgroundSize: 'cover', backgroundPosition: 'center',
-                    borderRadius: panel.radius, zIndex: panel.zIndex || 1,
-                    boxShadow: '0 10px 40px rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.3)'
-                  }}
-                />
-              ))}
-              <motion.div exit={{ opacity: 0, scale: 0.5 }} className="absolute inset-0 flex items-center justify-center z-100">
-                <div className="bg-[#1A365D] px-10 py-5 rounded-full border-2 border-white shadow-2xl">
-                   <span className="text-white font-black tracking-[0.4em] text-2xl">GOTICKET</span>
-                </div>
-              </motion.div>
-            </div>
-          </motion.div>
+            <ChevronsUp className="size-8 transition-transform group-hover:-translate-y-1" />
+          </motion.button>
         )}
       </AnimatePresence>
 
-      {/* --- MAIN CONTENT AREA --- */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={isAppReady ? { opacity: 1 } : {}}
-        className="relative w-full flex flex-col items-center"
-      >
-        {/* Hero Section */}
-        <div className="relative h-screen w-full flex items-center justify-center p-8 lg:p-16">
-          <div className="absolute inset-0 m-4 lg:m-12 rounded-xl overflow-hidden shadow-2xl">
-              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${IMAGES.MAIN_BG})` }} />
-              <div className="absolute inset-0 bg-black/30" />
-              <div className="relative h-full flex flex-col items-center justify-center text-center px-4">
-                  <h1 className="text-4xl md:text-6xl font-serif text-white max-w-3xl leading-tight">
-                      Discover Mumbai's <br /> 
-                      <span className="font-light italic">Hidden Natural Treasure</span>
-                  </h1>
-              </div>
-              {/* Info Bar */}
-              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-5xl bg-[#f5d94d] rounded-md p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
-                  <div className="flex gap-8 md:gap-12 text-sm md:text-base text-gray-900 font-medium">
-                      <div><p className="font-bold">Location <MapPin className="inline" size={14}/></p><p>Malabar Hill, Mumbai</p></div>
-                      <div><p className="font-bold">Timings</p><p>5:00 AM - 8:00 PM</p></div>
-                      <div><p className="font-bold">Entry Fee</p><p>₹25 - ₹100</p></div>
-                  </div>
-                  <button className="bg-white text-black px-8 py-3 rounded-md font-bold flex items-center gap-2 hover:bg-black hover:text-white transition-all group">
-                      Book Now <ArrowRight size={16} />
-                  </button>
-              </div>
-          </div>
-        </div>
+      <section className="relative overflow-hidden select-none bg-[#F4F1DE]/20">
+        <div className="font-sans bg-[#1A365D] shadow-xl/30">
+          <div className="relative h-[75vh] md:h-[90vh] overflow-hidden rounded-b-[40px] md:rounded-b-[80px]">
+            <motion.img
+              initial={{ scale: 1.12, opacity: 0 }}
+              animate={{ scale: 1.05, opacity: 1 }}
+              transition={{ duration: 1.2, ease: "easeOut" }}
+              src="/images/nahargarh-Fort.jpg"
+              alt="Jaipur"
+              className="absolute inset-0 w-full h-full object-cover opacity-85"
+            />
 
-        {/* --- MULTIPLE DECAY CARDS SECTION --- */}
-        <div className="w-full max-w-7xl px-8 py-20">
-          <h2 className="text-white text-4xl font-serif mb-12 text-center">Explore More <span className="italic opacity-70">Experiences</span></h2>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-            {CARD_DATA.map((card) => (
-              <div key={card.id} className="flex justify-center">
-                <DecayCard 
-                  width={280} 
-                  height={400} 
-                  image={card.img}
-                  baseFrequency={0.015}
-                  numOctaves={5}
-                  seed={card.id}
-                  maxDisplacement={150}
-                  movementBound={20}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-[#1A365D]/90 backdrop-blur-[1.3px] flex items-center justify-center text-center px-4">
+              <motion.div
+                variants={cascadeContainer}
+                initial="hidden"
+                animate="visible"
+                className="max-w-5xl"
+              >
+                <motion.p variants={fadeInUp} className="text-[#D4AF37] tracking-[6px] uppercase text-xs sm:text-sm mb-6 font-bold">
+                  Royal Heritage of Rajasthan
+                </motion.p>
+
+                <motion.h1 variants={fadeInUp} className="text-white text-4xl sm:text-5xl md:text-7xl font-serif tracking-wide leading-tight drop-shadow-2xl font-normal">
+                  Discover Jaipur's<br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-[#F4F1DE] to-[#D4AF37]">Hidden Natural Treasure</span>
+                </motion.h1>
+
+                <motion.p variants={fadeInUp} className="mt-8 text-white/80 text-base sm:text-lg md:text-xl leading-relaxed max-w-3xl mx-auto font-serif italic">
+                  Explore timeless forts, majestic palaces, and breathtaking
+                  desert landscapes woven deeply into Rajasthan's royal history.
+                </motion.p>
+              </motion.div>
+            </div>
+          </div>
+
+          <div className="relative flex justify-center px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 40, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.4 }}
+              className="w-full sm:w-11/12 md:w-4/5 bg-white rounded-[24px] border border-gray-100 px-6 sm:px-8 md:px-10 py-6 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-8 md:gap-12 -mt-20 z-30 relative overflow-hidden"
+            >
+              <div className="flex flex-col sm:flex-row flex-wrap gap-8 md:gap-12 w-full">
+                <div className="flex flex-col text-left">
+                  <span className="font-bold text-[#E07A5F] uppercase tracking-widest text-xs">
+                    📍 Location
+                  </span>
+                  <span className="text-[#1A365D] font-bold mt-1 text-sm sm:text-base">
+                    Jaipur Heritage
+                  </span>
+                </div>
+
+                <div className="flex flex-col text-left">
+                  <span className="font-bold text-[#E07A5F] uppercase tracking-widest text-xs">
+                    Timings
+                  </span>
+                  <span className="text-[#1A365D] font-bold mt-1 font-mono text-sm sm:text-base">
+                    5:00 AM - 8:00 PM
+                  </span>
+                </div>
+
+                <div className="flex flex-col text-left">
+                  <span className="font-bold text-[#E07A5F] uppercase tracking-widest text-xs">
+                    Royal Experience
+                  </span>
+                  <span className="text-[#1A365D] font-bold mt-1 text-sm sm:text-base">
+                    Premium Heritage Access
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex-shrink-0 w-full md:w-auto">
+                <Link
+                  href={placeId ? `/book-tickets/${placeId}` : "#"}
+                  className="inline-flex w-full md:w-auto"
                 >
-                  <div className="p-4">
-                    <h3 className="text-white text-xl font-bold">{card.title}</h3>
-                    <p className="text-white/60 text-sm mt-1">Discover the beauty</p>
-                  </div>
-                </DecayCard>
+                  <BookNowBtn
+                    title="Book Now"
+                    addClass="bg-gradient-to-r from-jaipur-dark to-[#994113] text-white border-none hover:from-jaipur-dark hover:to-[#b24d18] hover:scale-[1.02] active:scale-[0.98] shadow-[0_10px_25px_rgba(153,65,19,0.3)] transition-all duration-300"
+                  />
+                </Link>
               </div>
-            ))}
+            </motion.div>
           </div>
         </div>
-      </motion.div>
-    </div>
-  );
-};
 
-export default JaipurMosaicShutter;
+
+        <section>
+          <GuidBanner />
+        </section>
+
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={cascadeContainer}
+          className="mt-24 px-4 sm:px-6 md:px-10 lg:px-20 flex justify-end"
+        >
+          <div className="text-right max-w-3xl">
+            <motion.p variants={fadeInUp} className="font-serif font-bold text-3xl sm:text-4xl md:text-4xl leading-tight text-[#1A365D]">
+              Bringing the Desert Wilderness<br />
+              Closer to the People of Jaipur
+            </motion.p>
+
+            <motion.p variants={fadeInUp} className="mt-8 text-base sm:text-lg md:text-xl leading-[2] text-black/75">
+              Inspired by the raw beauty of the Aravalli landscape, the Kishan Bagh Sand Dunes Park offers a stunning ecological retreat at the foot of Nahargarh hills. Elevated walkways, golden dunes, and native vegetation together create a timeless desert experience unlike
+              any other in Rajasthan.
+            </motion.p>
+          </div>
+        </motion.div>
+
+        <Banners
+          url="https://assets.cntraveller.in/photos/66a9ce9ba5fa5da03ea872ba/master/w_1600%2Cc_limit/GettyImages-1503371454.jpg"
+          url2="https://www.world-unite.de/cache/thumbs/53641aa167837b9f5cad1aafec899ffc.jpg"
+          text="Step onto a timeless balcony framed by intricate arches, and take in breathtaking views of the historic city below."
+        />
+
+        <Banners
+          reverse={true}
+          url="https://www.andbeyond.com/wp-content/uploads/sites/5/Amber-fort-jaipur-Rajasthan-India.jpg"
+          url2="https://i.pinimg.com/736x/28/71/a5/2871a58198e0bb9bda1abb5a419c42e6.jpg"
+          text="From glowing palace walls to ancient mountain peaks — these golden landmarks capture the royal soul and timeless beauty of Rajasthan."
+        />
+
+        <Banners
+          url="https://www.ethnicrajasthan.com/cdn/shop/articles/thumbnail_IMG_4908.jpg?v=1567068228&width=2048"
+          url2="https://www.bizevdeyokuz.com/wp-content/uploads/jaipur-hindistan-duygu.jpg"
+          text="Step through majestic pink gateways and ornate marble arches to discover a world where royal history and breathtaking architecture meet."
+        />
+
+        <Banners
+          reverse={true}
+          url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGcOApDEmsmhqUe1DGhut0ydTlOAxxXt4Sog&s"
+          url2="https://media.tacdn.com/media/attractions-splice-spp-674x446/06/71/c3/4a.jpg"
+          text="The golden sandstone of Amer and the pink glow of the City Palace come alive, offering a breathtaking glimpse into timeless grandeur."
+        />
+
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={cascadeContainer}
+          className="mt-24 mb-16 px-4 sm:px-6 md:px-10 lg:px-20 flex justify-start"
+        >
+          <div className="max-w-3xl text-left">
+            <motion.p variants={fadeInUp} className="font-serif font-bold text-3xl sm:text-4xl md:text-5xl leading-tight text-[#1A365D]">
+              Discover the Royal Charm of Jaipur
+            </motion.p>
+
+            <motion.p variants={fadeInUp} className="mt-8 text-base sm:text-lg md:text-xl leading-[2] text-black/75">
+              Jaipur, famously known as the Pink City of India,
+              is a mesmerizing blend of heritage, culture,
+              architecture, and royal hospitality. Every fort,
+              palace, and bustling bazaar tells stories of kings,
+              warriors, and timeless traditions that continue to
+              inspire travelers from around the world.
+            </motion.p>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="mt-20 bg-[#1A365D] p-6 md:p-10"
+        >
+          <Image
+            src="/images/theJaipurCity.png"
+            alt="Jaipur View"
+            width={2000}
+            height={300}
+            className="w-full h-[220px] sm:h-[300px] md:h-[300px] object-cover rounded-[30px] shadow-2xl"
+          />
+        </motion.div>
+      </section>
+    </>
+  );
+} 

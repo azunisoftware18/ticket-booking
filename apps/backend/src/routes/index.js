@@ -7,6 +7,7 @@ import ticketTypeRoute from "./ticketType.routes.js";
 import addonRoute from "./addon.routes.js";
 import ticketRoutes from "./ticket.routes.js";  
 import scanLogRoutes from "./scanLog.routes.js";
+import settingRoute from "./setting.routes.js";
 
 const router = Router();
 
@@ -19,5 +20,7 @@ router.use("/ticket-type", ticketTypeRoute);
 router.use("/addon", addonRoute);
 router.use("/ticket", ticketRoutes);
 router.use("/scan-log", scanLogRoutes);
+router.use("/setting", settingRoute);
+
 
 export default router;

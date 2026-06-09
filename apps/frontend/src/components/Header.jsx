@@ -1,62 +1,70 @@
 "use client";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePlaces } from "@/hooks/usePlace";
+import BookNowBtn from "./ui/BookNowBtn";
+import { useGetSetting } from "@/lib/queries/useSetting";
+const Header = () => {
+  const [scrolled, setScrolled] = useState(false);
+  const { data: places = [] } = usePlaces();
+  const firstPlace = places?.[0];
+  const bookingLink = firstPlace
+    ? `/book-tickets/${firstPlace.id || firstPlace._id}`
+    : "#";
+  const { data: setting } = useGetSetting();
 
-import React, { useState } from "react";
-import { Menu, X, ArrowRight } from "lucide-react";
-import Button from "./ui/Button"; // Make sure path is correct
-import { useRouter } from "next/navigation";
-
-export default function Header() {
-  const [isOpen, setIsOpen] = useState(false);
-  const router = useRouter();
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   return (
-    // "absolute" use kiya hai taaki ye Hero image ke upar float kare
-    <header className="absolute top-0 z-50 w-full bg-transparent">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-24 items-center justify-between">
-          {/* LEFT: Logo Section */}
-          <div className="flex items-center gap-3 cursor-pointer">
-            <div className="bg-white p-2 rounded-full shadow-md">
-              <img
-                src="/logo.jpg"
-                alt="Logo"
-                className="h-10 w-10 object-contain"
-              />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-bold leading-tight text-white uppercase tracking-wider">
-                Elevated
-              </span>
-              <span className="text-lg font-medium leading-tight text-white/90">
-                Nature Trail
-              </span>
-            </div>
-          </div>
-{/* RIGHT: Language & Action Button */}
-          <div className="flex items-center gap-4">
-            <div className="hidden lg:block">
-              {/* Yellow Button like screenshot */}
-              <button
-                onClick={() => router.push("/book-tickets")}
-                className="flex items-center gap-2 bg-[#F2D64B] hover:bg-[#e2c53d] text-black font-bold py-3 px-6 rounded-lg transition-all shadow-lg"
-              >
-                Book Now
-                <div className="bg-black rounded-full p-1">
-                  <ArrowRight size={16} className="text-[#F2D64B]" />
-                </div>
-              </button>
-            </div>
+    <nav
+      className={`fixed w-full z-[999] top-0 left-0 transition-all duration-500 border-b backdrop-blur-xl ${scrolled ? "bg-royal-blue/90 shadow-2xl shadow-black/10 border-gold/20 py-2" : "bg-sandstone/90 border-jaipur-dark/10 py-2"}`}
+    >
+      <div className="max-w-7xl flex items-center justify-between mx-auto px-4 sm:px-6 lg:px-10 h-[60px]">
+        <Link href="/" className="flex items-center gap-3 group">
+          <img
+            src={
+              setting?.logo
+                ? `${process.env.NEXT_PUBLIC_IMAGE_URL}${setting.logo}`
+                : "/logo.png"
+            }
+            alt="Logo"
+            className="w-12 h-12 md:w-14 md:h-14 rounded-full border-2 border-jaipur-pink object-cover shadow-lg shadow-jaipur-pink/20 transition-all duration-500 group-hover:scale-105"
+          />
 
-            {/* Mobile Menu */}
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="lg:hidden text-white p-2"
-            >
-              {isOpen ? <X size={30} /> : <Menu size={30} />}
-            </button>
-          </div>
+          <p
+            className={`font-bold text-lg sm:text-xl leading-tight ${
+              scrolled ? "text-white" : "text-royal-blue"
+            }`}
+          >
+            {setting?.companyName || "Jaipur"}
+
+            <br />
+
+            <span className="text-jaipur-pink text-xs uppercase tracking-[3px]">
+              Travel
+            </span>
+          </p>
+        </Link>
+
+        <div className="md:order-2">
+          <Link href={bookingLink}>
+            <BookNowBtn
+              title={"Book Now"}
+              addClass="bg-gradient-to-r from-jaipur-dark to-[#994113] text-white border-none hover:from-jaipur-dark hover:to-[#b24d18] hover:scale-[1.02] active:scale-[0.98] shadow-[0_10px_25px_rgba(153,65,19,0.3)] transition-all duration-300"
+            />
+          </Link>
         </div>
       </div>
-    </header>
+    </nav>
   );
-}
+};
+
+export default Header;

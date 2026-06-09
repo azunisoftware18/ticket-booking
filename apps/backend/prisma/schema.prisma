@@ -120,8 +120,6 @@ model Addon {
   @@map("addons")
 }
 
-
-
 model Booking {
   id String @id @default(uuid())
 
@@ -212,6 +210,25 @@ model ScanLog {
 
   @@index([ticketId])
   @@map("scan_logs")
+}
+
+model Setting {
+  id String @id @default("global-setting")
+
+  companyName String?
+  email       String?
+  phone       String?
+  address     String? @db.LongText
+
+  logo    String? // S3 URL
+  logoKey String? // S3 Key
+
+  socialLinks Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
 }
 
 enum GateType {

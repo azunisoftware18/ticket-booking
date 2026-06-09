@@ -16,6 +16,7 @@ app.use(cookieParser());
 app.use(responseHandler);
 
 app.use("/api", router);
+app.use("/uploads", express.static("uploads"));
 
 app.get("/health", (req, res) => {
   res.json({ status: "health is ok" });

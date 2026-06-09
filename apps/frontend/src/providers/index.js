@@ -8,9 +8,7 @@ export default function Providers({ children }) {
   return (
     <ReduxProvider>
       <ReactQueryProvider>
-        <AuthLoader>
-          {children}
-        </AuthLoader>
+        <AuthLoader>{children}</AuthLoader>
       </ReactQueryProvider>
     </ReduxProvider>
   );
