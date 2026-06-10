@@ -7,9 +7,20 @@ import cookieParser from "cookie-parser";
 
 const app = express();
 
+const allowedOrigins = [
+  "http://k1v8hsaerw859ftjfpn6e8i7.147.93.20.127.sslip.io",
+  "http://localhost:3000",
+];
+
 app.use(
   cors({
-    origin: ["http://k1v8hsaerw859ftjfpn6e8i7.147.93.20.127.sslip.io"],
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
