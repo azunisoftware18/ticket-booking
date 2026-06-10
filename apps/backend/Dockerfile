@@ -11,6 +11,6 @@ COPY . .
 # Prisma Client Generate
 RUN npx prisma generate
 
-EXPOSE 8000
+EXPOSE 5600
 
 CMD ["npm", "start"]
