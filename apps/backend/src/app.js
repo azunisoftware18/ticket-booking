@@ -7,7 +7,12 @@ import cookieParser from "cookie-parser";
 
 const app = express();
 
-app.use(cors({ origin: "*", credentials: true }));
+app.use(
+  cors({
+    origin: ["http://k1v8hsaerw859ftjfpn6e8i7.147.93.20.127.sslip.io"],
+    credentials: true,
+  })
+);
 
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(express.json({ limit: "50mb" }));
