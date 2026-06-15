@@ -23,7 +23,6 @@ export default function AddonTable({
   const [page, setPage] = useState(1);
   const itemsPerPage = 10; // ✅ Ek page par kitne items dikhane hain
 
-  // ✅ Search Filter (Memoized for performance)
   const filteredAddons = useMemo(() => {
     return data.filter((addon) =>
       addon.name.toLowerCase().includes(search.toLowerCase())
