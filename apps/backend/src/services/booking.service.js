@@ -4,6 +4,14 @@ import QRCode from "qrcode";
 import { ApiError } from "../utils/ApiError.js";
 import { envConfig } from "../config/env.config.js";
 import { log } from "node:console";
+import TicketService from "./ticket.service.js";
+
+import fs from "fs";
+import os from "os";
+import path from "path";
+
+import { upload } from "../utils/s3Service.js";
+import WhatsappService from "./whatsapp.service.js";
 
 class BookingService {
   static async createBooking(payload, user) {
@@ -61,8 +69,8 @@ class BookingService {
         let addonAmount = 0;
 
         addonList.forEach((addon) => {
-  addonAmount += addon.price;
-});
+          addonAmount += addon.price;
+        });
 
         const finalAmount = totalAmount + addonAmount;
 
@@ -225,6 +233,64 @@ class BookingService {
         });
       }
     }
+
+    // Generate PDF
+const pdfBuffer = await TicketService.generatePDF(booking.id);
+
+// Temporary file
+const tempFile = path.join(
+  os.tmpdir(),
+  `ticket-${booking.id}.pdf`
+);
+
+fs.writeFileSync(tempFile, pdfBuffer);
+
+// Upload S3
+const uploadedFile = await upload(tempFile);
+
+// Save URL
+await prisma.booking.update({
+  where: {
+    id: booking.id,
+  },
+
+  data: {
+    ticketPdfUrl: uploadedFile.url,
+    ticketPdfKey: uploadedFile.key,
+  },
+});
+
+const message = `☃️*Dear ${booking.name},*
+
+Thank you for booking with ❄️${originalBooking.place.name}!❄️🥳
+
+Here are your 🎟️ entry ticket details:
+
+📅 Date: ${new Date(booking.slotDateTime).toLocaleDateString("en-IN")}
+
+🎫 Total Tickets: ${booking.totalSeats}
+
+💰 Total Price: Rs ${booking.totalAmount}
+
+🛑 Important: Please keep your QR code safe and do NOT share it with anyone!
+
+📲 Show it only at the entry gate to authorized staff.
+
+Bundle up and get ready for a snow-tastic time! ⛷️🎿
+
+We can't wait to welcome you! ☕🔥`;
+
+try {
+
+
+await WhatsappService.sendTicket(
+    booking.phone,
+    message,
+    uploadedFile.url
+);
+} catch (error) {
+  console.log("WhatsApp sending failed", error);
+}
 
     return updatedBooking;
   }

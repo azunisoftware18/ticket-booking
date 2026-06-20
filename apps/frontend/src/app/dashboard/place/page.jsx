@@ -29,67 +29,67 @@ export default function PlacePage() {
     }
   }, [alert.show]);
 
-const handleFormSubmit = async (formData) => {
-  try {
-    const payload = {
-      name: formData.name.trim(), // Trim whitespace
-      location: formData.location.trim(),
-      latitude: Number(formData.latitude),
-      longitude: Number(formData.longitude),
-      shortDescription: formData.shortDescription,
-      description: formData.description,
-    };
+  const handleFormSubmit = async (formData) => {
+    try {
+      const payload = {
+        name: formData.name.trim(), // Trim whitespace
+        location: formData.location.trim(),
+        latitude: Number(formData.latitude),
+        longitude: Number(formData.longitude),
+        shortDescription: formData.shortDescription,
+        description: formData.description,
+      };
 
-    // 🔥 ENHANCED DUPLICATE CHECK
-    const isDuplicate = places?.some((p) => {
-      // Name aur Location dono ko lowercase mein check karein taaki "Jaipur" aur "jaipur" same mane jayein
-      const nameMatch = p.name.toLowerCase() === payload.name.toLowerCase();
-      const locationMatch = p.location.toLowerCase() === payload.location.toLowerCase();
-      
-      // Agar Edit kar rahe hain to khud ko ignore karein
-      const isNotCurrentItem = p.id !== editData?.id;
+      // 🔥 ENHANCED DUPLICATE CHECK
+      const isDuplicate = places?.some((p) => {
+        // Name aur Location dono ko lowercase mein check karein taaki "Jaipur" aur "jaipur" same mane jayein
+        const nameMatch = p.name.toLowerCase() === payload.name.toLowerCase();
+        const locationMatch = p.location.toLowerCase() === payload.location.toLowerCase();
 
-      return nameMatch && locationMatch && isNotCurrentItem;
-    });
+        // Agar Edit kar rahe hain to khud ko ignore karein
+        const isNotCurrentItem = p.id !== editData?.id;
 
-    if (isDuplicate) {
+        return nameMatch && locationMatch && isNotCurrentItem;
+      });
+
+      if (isDuplicate) {
+        setAlert({
+          show: true,
+          message: `Oops! "${payload.name}" already exists in "${payload.location}".`,
+          type: "error",
+        });
+        return; // Code yahan ruk jayega, aage create nahi hoga
+      }
+
+      // Agar duplicate nahi hai, tabhi aage badhega
+      if (editData) {
+        await updatePlace({
+          id: editData.id,
+          payload,
+        });
+      } else {
+        await createPlace(payload);
+      }
+
+      setEditData(null);
+      setIsModalOpen(false);
+
       setAlert({
         show: true,
-        message: `Oops! "${payload.name}" already exists in "${payload.location}".`,
+        message: editData
+          ? "Place updated successfully!"
+          : "Place created successfully!",
+        type: "success",
+      });
+
+    } catch (err) {
+      setAlert({
+        show: true,
+        message: "Something went wrong",
         type: "error",
       });
-      return; // Code yahan ruk jayega, aage create nahi hoga
     }
-
-    // Agar duplicate nahi hai, tabhi aage badhega
-    if (editData) {
-      await updatePlace({
-        id: editData.id,
-        payload,
-      });
-    } else {
-      await createPlace(payload);
-    }
-
-    setEditData(null);
-    setIsModalOpen(false);
-
-    setAlert({
-      show: true,
-      message: editData
-        ? "Place updated successfully!"
-        : "Place created successfully!",
-      type: "success",
-    });
-
-  } catch (err) {
-    setAlert({
-      show: true,
-      message: "Something went wrong",
-      type: "error",
-    });
-  }
-};
+  };
   const handleDelete = async (place) => {
     if (!confirm("Delete this place?")) return;
 
@@ -120,11 +120,10 @@ const handleFormSubmit = async (formData) => {
       {/* --- INLINE ALERT MESSAGE --- */}
       {alert.show && (
         <div
-          className={`fixed top-6 left-1/2 -translate-x-1/2 z-10000 flex items-center gap-3 px-6 py-3 rounded-2xl shadow-2xl animate-in slide-in-from-top duration-300 ${
-            alert.type === "success"
+          className={`fixed top-6 left-1/2 -translate-x-1/2 z-10000 flex items-center gap-3 px-6 py-3 rounded-2xl shadow-2xl animate-in slide-in-from-top duration-300 ${alert.type === "success"
               ? "bg-emerald-500 text-white"
               : "bg-red-500 text-white"
-          }`}
+            }`}
         >
           {alert.type === "success" ? (
             <CheckCircle2 size={20} />
@@ -143,7 +142,14 @@ const handleFormSubmit = async (formData) => {
           <p className="text-slate-500 font-medium">Manage your locations</p>
         </div>
 
-        <Button icon={PlusIcon} iconPosition="left" onClick={() => setIsModalOpen(true)} text="Add New Place" />
+        {(!places || places.length === 0) && (
+          <Button
+            icon={PlusIcon}
+            iconPosition="left"
+            onClick={() => setIsModalOpen(true)}
+            text="Add New Place"
+          />
+        )}
       </div>
 
       <div className="w-full mx-auto bg-white border border-slate-200 rounded-xl shadow-sm">

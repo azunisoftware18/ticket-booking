@@ -9,7 +9,7 @@ import Image from "next/image";
 import { usePlaces } from "@/hooks/usePlace";
 // import PlacesSlider from "@/components/Home/PlacesSlider";
 import GuidBanner from "@/components/common/home/GuidBanner";
-import { ChevronsUp } from "lucide-react";
+import { ChevronsUp, MapPin } from "lucide-react";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
@@ -27,6 +27,9 @@ const cascadeContainer = {
 export default function Home() {
   const { data: places = [] } = usePlaces();
   const placeId = places?.[0]?._id || places?.[0]?.id;
+  const latitude = places?.[0]?.latitude;
+  const longitude = places?.[0]?.longitude;
+  const placeName = places?.[0]?.name;
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -47,6 +50,14 @@ export default function Home() {
       behavior: "smooth",
     });
   };
+  const openGoogleMap = () => {
+    if (!latitude || !longitude) return;
+
+    window.open(
+      `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`,
+      "_blank"
+    );
+  };
 
   return (
     <>
@@ -57,7 +68,7 @@ export default function Home() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
             onClick={scrollToTop}
-            className="fixed bottom-8 right-8 z-50 p-3 rounded-full group cursor-pointer bg-gradient-to-r from-jaipur-dark to-[#994113] text-white border-none hover:from-jaipur-dark hover:to-[#b24d18] hover:scale-[1.02] active:scale-[0.98] shadow-[0_10px_25px_rgba(153,65,19,0.3)] transition-all duration-300"
+            className="fixed bottom-8 right-8 z-50 p-3 rounded-full group cursor-pointer bg-linear-to-r from-jaipur-dark to-[#994113] text-white border-none hover:from-jaipur-dark hover:to-[#b24d18] hover:scale-[1.02] active:scale-[0.98] shadow-[0_10px_25px_rgba(153,65,19,0.3)] transition-all duration-300"
           >
             <ChevronsUp className="size-8 transition-transform group-hover:-translate-y-1" />
           </motion.button>
@@ -76,20 +87,20 @@ export default function Home() {
               className="absolute inset-0 w-full h-full object-cover opacity-85"
             />
 
-            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-[#1A365D]/90 backdrop-blur-[1.3px] flex items-center justify-center text-center px-4">
+            <div className="absolute inset-0 bg-linear-to-b from-black/60 via-black/40 to-[#1A365D]/90 backdrop-blur-[1.3px] flex items-center justify-center text-center px-4">
               <motion.div
                 variants={cascadeContainer}
                 initial="hidden"
                 animate="visible"
                 className="max-w-5xl"
               >
-                <motion.p variants={fadeInUp} className="text-[#D4AF37] tracking-[6px] uppercase text-xs sm:text-sm mb-6 font-bold">
+                <motion.p variants={fadeInUp} className="text-gold tracking-[6px] uppercase text-xs sm:text-sm mb-6 font-bold">
                   Royal Heritage of Rajasthan
                 </motion.p>
 
                 <motion.h1 variants={fadeInUp} className="text-white text-4xl sm:text-5xl md:text-7xl font-serif tracking-wide leading-tight drop-shadow-2xl font-normal">
                   Discover Jaipur's<br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-[#F4F1DE] to-[#D4AF37]">Hidden Natural Treasure</span>
+                  <span className="text-transparent bg-clip-text bg-linear-to-r from-white via-[#F4F1DE] to-gold">Hidden Natural Treasure</span>
                 </motion.h1>
 
                 <motion.p variants={fadeInUp} className="mt-8 text-white/80 text-base sm:text-lg md:text-xl leading-relaxed max-w-3xl mx-auto font-serif italic">
@@ -108,20 +119,36 @@ export default function Home() {
               className="w-full sm:w-11/12 md:w-4/5 bg-white rounded-[24px] border border-gray-100 px-6 sm:px-8 md:px-10 py-6 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-8 md:gap-12 -mt-20 z-30 relative overflow-hidden"
             >
               <div className="flex flex-col sm:flex-row flex-wrap gap-8 md:gap-12 w-full">
-                <div className="flex flex-col text-left">
-                  <span className="font-bold text-[#E07A5F] uppercase tracking-widest text-xs">
-                    📍 Location
+                <div className="flex flex-col text-left  min-w-[160px]">
+                  <span className="font-bold text-[#E07A5F] uppercase tracking-widest text-xs mb-2 flex items-center gap-1 ">
+                     Location
                   </span>
-                  <span className="text-[#1A365D] font-bold mt-1 text-sm sm:text-base">
-                    Jaipur Heritage
-                  </span>
+
+                  <div className="flex justify-start">
+                    <button
+                      onClick={openGoogleMap}
+                      className="inline-flex items-center gap-2.5 px-3 py-1.5 bg-slate-50 hover:bg-red-50/60 border border-slate-100 hover:border-red-100 rounded-full text-[#1A365D] hover:text-red-600 transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-red-200"
+                      title="Open Jaipur Heritage in Google Maps"
+                      aria-label="Open Jaipur Heritage in Google Maps"
+                    >
+                      <span className="font-bold text-sm sm:text-base tracking-wide">
+                        Jaipur Heritage
+                      </span>
+                      <div className="p-1 rounded-full bg-white group-hover:bg-red-50 shadow-sm transition-colors">
+                        <MapPin
+                          size={16}
+                          className="text-red-500 transform group-hover:translate-y-[-1px] group-hover:scale-105 transition-all"
+                        />
+                      </div>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="flex flex-col text-left">
                   <span className="font-bold text-[#E07A5F] uppercase tracking-widest text-xs">
                     Timings
                   </span>
-                  <span className="text-[#1A365D] font-bold mt-1 font-mono text-sm sm:text-base">
+                  <span className="text-[#1A365D] font-bold mt-4 font-mono text-sm sm:text-base">
                     5:00 AM - 8:00 PM
                   </span>
                 </div>
@@ -130,7 +157,7 @@ export default function Home() {
                   <span className="font-bold text-[#E07A5F] uppercase tracking-widest text-xs">
                     Royal Experience
                   </span>
-                  <span className="text-[#1A365D] font-bold mt-1 text-sm sm:text-base">
+                  <span className="text-[#1A365D] font-bold mt-4 text-sm sm:text-base">
                     Premium Heritage Access
                   </span>
                 </div>

@@ -146,6 +146,9 @@ model Booking {
 
   addonIds Json? @map("addon_ids")
 
+  ticketPdfUrl String? @map("ticket_pdf_url")
+  ticketPdfKey String? @map("ticket_pdf_key")
+
   createdAt DateTime @default(now()) @map("created_at")
 
   tickets       Ticket[]

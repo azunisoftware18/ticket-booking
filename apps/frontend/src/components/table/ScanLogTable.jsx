@@ -9,65 +9,136 @@ import {
   TableLoader,
 } from "@/components/table/core";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { Filter, XCircle } from "lucide-react";
 
 export default function ScanLogTable({
-  data = [],
+  data = [],           // Paginated data for display
+  allData = [],        // Complete data for filtering
   loading = false,
+  paginationProps,
+  onFilteredDataChange, // Callback to parent with filtered results
 }) {
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const itemsPerPage = 10; // Ek page par kitne logs dikhane hain
+  const [dateFilter, setDateFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
 
-  // ✅ 1. Filtered Logs (Search logic)
-  const filteredLogs = useMemo(() => {
-    return data.filter((log) =>
-      log.ticket?.id?.toLowerCase().includes(search.toLowerCase()) ||
-      log.type?.toLowerCase().includes(search.toLowerCase())
-    );
-  }, [data, search]);
+  // ✅ Filter ALL data (not just current page)
+  const filteredData = useMemo(() => {
+    if (!allData || allData.length === 0) return [];
+    
+    return allData.filter((log) => {
+      // Search filter - checks multiple fields
+      const searchTerm = search.toLowerCase().trim();
+      const matchesSearch = !searchTerm || 
+        log.ticket?.id?.toLowerCase().includes(searchTerm) ||
+        log.type?.toLowerCase().includes(searchTerm);
 
-  // ✅ 2. Pagination Calculations
-  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage) || 1;
-  
-  // Current page ka data nikalne ke liye slice
-  const startIndex = (page - 1) * itemsPerPage;
-  const currentTableData = filteredLogs.slice(startIndex, startIndex + itemsPerPage);
+      // Date filter - filters by scannedAt date
+      const matchesDate = !dateFilter ||
+        log.scannedAt?.split("T")[0] === dateFilter;
 
-  // ✅ 3. Reset to page 1 when searching
-  const handleSearch = (e) => {
-    setSearch(e.target.value);
-    setPage(1);
+      // Type filter
+      const matchesType = !typeFilter ||
+        log.type?.toLowerCase() === typeFilter.toLowerCase();
+
+      return matchesSearch && matchesDate && matchesType;
+    });
+  }, [allData, search, dateFilter, typeFilter]);
+
+  // ✅ Notify parent about filtered data for pagination
+  useEffect(() => {
+    if (onFilteredDataChange) {
+      onFilteredDataChange(filteredData);
+    }
+  }, [filteredData, onFilteredDataChange]);
+
+  // ✅ Get unique types from ALL data for filter options
+  const typeOptions = useMemo(() => {
+    if (!allData || allData.length === 0) return [];
+    return [...new Set(allData.map(log => log.type))].filter(Boolean).sort();
+  }, [allData]);
+
+  const clearAllFilters = () => {
+    setSearch("");
+    setDateFilter("");
+    setTypeFilter("");
   };
 
+  const hasActiveFilters = search || dateFilter || typeFilter;
+
   return (
-    <div className=" bg-slate-50 min-h-screen">
+    <div className="bg-slate-50 min-h-screen">
       <TableShell
         title="Scan Logs"
+        subtitle={`${filteredData.length} total logs${hasActiveFilters ? ' (filtered)' : ''}`}
         searchProps={{
           value: search,
-          onChange: handleSearch,
-          onClear: () => { setSearch(""); setPage(1); },
-          placeholder: "Search ticket or type...",
+          onChange: (e) => setSearch(e.target.value),
+          onClear: () => setSearch(""),
+          placeholder: "Search ticket ID or type...",
         }}
-        paginationProps={{
-          page,
-          totalPages,
-          // Next button logic
-          onNext: () => setPage((p) => Math.min(p + 1, totalPages)),
-          // Prev button logic
-          onPrev: () => setPage((p) => Math.max(p - 1, 1)),
-        }}
+        paginationProps={paginationProps}
+        customFilters={
+          <div className="w-full">
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Date Filter */}
+              <div className="relative">
+                <input
+                  type="date"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all cursor-pointer"
+                  title="Filter by scan date"
+                />
+              </div>
+
+              {/* Type Filter */}
+              {/* <select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+                className="px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white min-w-[140px] cursor-pointer"
+              >
+                <option value="">All Types</option>
+                {typeOptions.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select> */}
+
+              {/* Active Filters Indicator & Clear Button */}
+              {hasActiveFilters && (
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 px-3 py-2 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium">
+                    <Filter className="w-3 h-3" />
+                    Filters active
+                  </div>
+                  <button
+                    onClick={clearAllFilters}
+                    className="inline-flex items-center gap-1 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium"
+                  >
+                    <XCircle className="w-4 h-4" />
+                    Clear All
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        }
       >
         <TableHead columns={["Ticket ID", "Type", "Scanned At"]} />
 
         <TableBody>
           {loading ? (
-            <TableLoader rows={itemsPerPage} />
-          ) : currentTableData.length === 0 ? (
-            <TableEmpty colSpan={3} message="No scan logs found" />
+            <TableLoader rows={5} />
+          ) : data.length === 0 ? (
+            <TableEmpty 
+              colSpan={3} 
+              message={hasActiveFilters ? "No scan logs match your filters" : "No scan logs found"} 
+            />
           ) : (
-            currentTableData.map((log) => (
+            data.map((log) => (
               <TableRow key={log.id}>
                 {/* Ticket ID */}
                 <td className="px-5 py-3 font-medium text-gray-800 whitespace-nowrap">

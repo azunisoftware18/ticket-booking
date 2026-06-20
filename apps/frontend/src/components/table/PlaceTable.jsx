@@ -70,12 +70,12 @@
                         icon: Pencil,
                         onClick: () => onEdit?.(place),
                       },
-                      {
-                        label: "Delete",
-                        icon: Trash,
-                        danger: true,
-                        onClick: () => onDelete?.(place),
-                      },
+                      // {
+                      //   label: "Delete",
+                      //   icon: Trash,
+                      //   danger: true,
+                      //   onClick: () => onDelete?.(place),
+                      // },
                     ]}
                   />
                 </div>

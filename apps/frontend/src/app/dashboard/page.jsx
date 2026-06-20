@@ -51,21 +51,26 @@ export default function Page() {
   // =====================
 
   const totalRevenue =
-    tickets?.reduce((sum, ticket) => {
-
-      return (
-        sum +
-        Number(ticket?.booking?.totalAmount || 0)
-      );
-
-    }, 0) || 0;
+  bookings?.reduce((sum, booking) => {
+    if (
+      booking.status === "PAID" ||
+      booking.paymentStatus === "PAID"
+    ) {
+      return sum + Number(booking.totalAmount || 0);
+    }
+    return sum;
+  }, 0) || 0;
 
   // =====================
   // TOTAL BOOKINGS
   // =====================
 
   const totalBookings =
-    bookings?.length || 0;
+  bookings?.filter(
+    (booking) =>
+      booking.status === "PAID" ||
+      booking.paymentStatus === "PAID"
+  ).length || 0;
 
   // =====================
   // PENDING BOOKINGS
